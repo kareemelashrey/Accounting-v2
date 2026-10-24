@@ -1,20 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>جاري تحميل البرنامج...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام المحاسبة</title>
+    <!-- تحميل المكتبات بشكل مباشر عشان نمنع مشاكل -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="background:#0f172a; color:white; text-align:center; padding-top:50px; font-family:sans-serif;">
-    <h1>جاري تحميل البرنامج...</h1>
-    <script>
-        // الكود الكبير مشفر هنا عشان الموبايل ميعرفش يلخبطه
-        const base64Code = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImFyIiBkaXI9InJ0bCI+CjxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0iVVRGLTgiPgogICAgPHRpdGxlPtmG2LjYp9mFINin2YTZhdit2KfYs9io2Kk8L3RpdGxlPgogICAgPHNjcmlwdCBzcmM9Imh0dHBzOi8vY2RuLmpzZGVsaXZyLm5ldC9ucG0vQHN1cGFiYXNlL3N1cGFiYXNlLWpzQDIiPjwvc2NyaXB0PgogICAgPHNjcmlwdCBzcmM9Imh0dHBzOi8vY2RuLnRhaWx3aW5kY3NzLmNvbSI+PC9zY3JpcHQ+CjwvaGVhZD4KPGJvZHkgY2xhc3M9ImJnLWdyYXktMTAwIGZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIGgteHNjcmVlbiI+CiAgICA8ZGl2IGlkPSJsb2dpbiIgY2xhc3M9ImJnLXdoaXRlIHAtOCByb3VuZGVkIHNoYWRvdy1tZCB3LTgwIHRleHQtY2VudGVyIj4KICAgICAgICA8aDIgY2xhc3M9InRleHQteGwgZm9udC1ib2xkIG1iLTQiPtin2YTYr9iu2YjZhCDYqNmG2KzYp9itPC9oMj4KICAgICAgICA8cCBpZD0ibXNnIiBjbGFzcz0idGV4dC1yZWQtNTAwIHRleHQtc20gbWItMiI+PC9wPgogICAgICAgIDxpbnB1dCB0eXBlPSJlbWFpbCIgaWQ9ImVtYWlsIiBwbGFjZWhvbGRlcj0i2KfZhNil2YrZhdmK2YQiIGNsYXNzPSJ3LWZ1bGwgcC0yIG1iLTMgYm9yZGVyIHJvdW5kZWQiIGRpcj0ibHRyIj4KICAgICAgICA8aW5wdXQgdHlwZT0icGFzc3dvcmQiIGlkPSJwYXNzd29yZCIgcGxhY2Vob2xkZXI9Itin2YTYqNin2LPZiNix2K8iIGNsYXNzPSJ3LWZ1bGwgcC0yIG1iLTQgYm9yZGVyIHJvdW5kZWQiIGRpcj0ibHRyIj4KICAgICAgICA8YnV0dG9uIGlkPSJidG4iIGNsYXNzPSJiZy1ibHVlLTYwMCB0ZXh0LXdoaXRlIHctZnVsbCBwLTIgcm91bmRlZCI+2K/Zh9mI2YQ8L2J1dHRvbj4KICAgIDwvZGl2PgogICAgPGRpdiBpZD0iZGFzaCIgY2xhc3M9ImhpZGRlbiBiZy13aGl0ZSBwLTggcm91bmRlZCBzaGFkb3ctbWQgdGV4dC1jZW50ZXIiPgogICAgICAgIDxoMiBjbGFzcz0idGV4dC0yeGwgdGV4dC1ncmVlbi02MDAgZm9udC1ib2xkIG1iLTQiPtmF2LEg2KfZhNiv2K7ZiNmEINio2YbYrNin2K0hPC9oMj4KICAgICAgICA8YnV0dG9uIGlkPSJvdXQiIGNsYXNzPSJiZy1yZWQtNTAwIHRleHQtd2hpdGUgcHgtNCBweS0yIHJvdW5kZWQiPtiu2LHZiNisPC9idXR0b24+CiAgICA8L2Rpdj4KICAgIDxzY3JpcHQ+CiAgICAgICAgY29uc3QgdXJsID0gJ2h0dHBzOi8vd2pkaGlreHV3b290bXNuenRtZ2Iuc3VwYWJhc2UuY28nOwogICAgICAgIGNvbnN0IGtleSA9ICdleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKcGMzTWlPaUp6ZFhCaFlteGhaWE1pTENKcmFXUWlPaUozYW1Sb2FXdDRkWGR2YjNSdGMzTjZkRzFuWWlJc0luSnZiR1VpT2lKaGJtOXVJaXdpYVdGMElqb3hOemt5TnpnNE9UVXNJbVY0Y0NJNk1qRXdPRE0yTkRnMU9YMC5TUUxUblVzZFhIVHc2RVRVUFZTNnFwT1hwUTUwc25IdjllMGgtR1BMem1FJzsKICAgICAgICBjb25zdCBzdXBhYmFzZSA9IHdpbmRvdy5zdXBhYmFhc2UuY3JlYXRlQ2xpZW50KHVybCwga2V5KTsKCiAgICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2J0bicpLmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJywgYXN5bmMgKCkgPT4gewogICAgICAgICAgICBjb25zdCBlbWFpbCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdlbWFpbCcpLnZhbHVlOwogICAgICAgICAgICBjb25zdCBwYXNzd29yZCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdwYXNzd29yZCcpLnZhbHVlOwogICAgICAgICAgICBjb25zdCBtc2cgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnbXNnJyk7CiAgICAgICAgICAgIAogICAgICAgICAgICBpZighZW1haWwgfHwgIXBhc3N3b3JkKSB7IG1zZy5pbm5lclRleHQgPSAi2KfZg9iq2Kgg2KfZhNio2YrYp9mG2KfYqiEi3IHJldHVybjsgfQogICAgICAgICAgICBtc2cuaW5uZXJUZXh0ID0gItis2KfYsdmKLi4uIjsKCiAgICAgICAgICAgIHRyeSB7CiAgICAgICAgICAgICAgICBsZXQgeyBlcnJvciB9ID0gYXdhaXQgc3VwYWJhc2UuYXV0aC5zaWduSW5XaXRoUGFzc3dvcmQoeyBlbWFpbCwgcGFzc3dvcmQgfSk7CiAgICAgICAgICAgICAgICBpZiAoZXJyb3IpIHsKICAgICAgICAgICAgICAgICAgICBsZXQgeyBlcnJvcjogc3ViZXJyIH0gPSBhd2FpdCBzdXBhYmFzZS5hdXRoLnNpZ25VcCh7IGVtYWlsLCBwYXNzd29yZCB9KTsKICAgICAgICAgICAgICAgICAgICBpZiAoc3ViZXJyKSB0aHJvdyBuZXcgRXJyb3Ioc3ViZXJyLm1lc3NhZ2UpOwogICAgICAgICAgICAgICAgICAgIG1zZy5pbm5lclRleHQgPSAi2KrZhSDYpdmG2LTYp9ihINin2YTYrXNh2KjYjCDYr9mI2LMg2K/YrtmI2YQg2KrYp9mG2YouIjsKICAgICAgICAgICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgICAgICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2xvZ2luJykuY2xhc3NMaXN0LmFkZCgnaGlkZGVuJyk7CiAgICAgICAgICAgICAgICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2Rhc2gnKS5jbGFzc0xpc3QucmVtb3ZlKCdoaWRkZW4nKTsKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfSBjYXRjaCAoZSkgewogICAgICAgICAgICAgICAgbXNnLmlubmVyVGV4dCA9IGUubWVzc2FnZTsKICAgICAgICAgICAgfQogICAgICAgIH0pOwoKICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnb3V0JykuYWRkRXZlbnRMaXN0ZW5lcignY2xpY2snLCBhc3luYyAoKSA9PiB7CiAgICAgICAgICAgIGF3YWl0IHN1cGFiYXNlLmF1dGguc2lnbk91dCgpOwogICAgICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZGFzaCcpLmNsYXNzTGlzdC5hZGQoJ2hpZGRlbicpOwogICAgICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnbG9naW4nKS5jbGFzc0xpc3QucmVtb3ZlKCdoaWRkZW4nKTsKICAgICAgICB9KTsKICAgIDwvc2NyaXB0Pgo8L2JvZHk+CjwvaHRtbD4=";
+<body class="bg-gray-100 flex items-center justify-center h-screen">
 
-        // فك تشفير الكود وتشغيله
-        const decodedCode = atob(base64Code);
-        document.open();
-        document.write(decodedCode);
-        document.close();
+    <div id="loginScreen" class="bg-white p-8 rounded shadow-md w-80 text-center">
+        <h2 class="text-xl font-bold mb-4">تسجيل الدخول</h2>
+        <p id="msg" class="text-red-500 text-sm mb-2"></p>
+        <input type="email" id="email" placeholder="الإيميل" class="w-full p-2 mb-3 border rounded" dir="ltr">
+        <input type="password" id="password" placeholder="الباسورد" class="w-full p-2 mb-4 border rounded" dir="ltr">
+        <button id="btn" class="bg-blue-600 text-white w-full p-2 rounded font-bold">دخول / إنشاء حساب</button>
+    </div>
+
+    <div id="dashScreen" style="display:none;" class="bg-white p-8 rounded shadow-md text-center">
+        <h2 class="text-2xl text-green-600 font-bold mb-4">تم الدخول بنجاح!</h2>
+        <p class="mb-4">إنت الآن في لوحة التحكم.</p>
+        <button id="outBtn" class="bg-red-500 text-white px-4 py-2 rounded">خروج</button>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const url = 'https://wjdhikxuwootmsnztmgb.supabase.co';
+            const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGhpa3h1d29vdG1zbnp0bWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODg1OTksImV4cCI6MjEwODM2NDg1OX0.SQlTNUsdXHTw6ETUPVS6qpOXpQ50snHv9e0h-GPLzmE';
+            const supabase = window.supabase.createClient(url, key);
+
+            document.getElementById('btn').addEventListener('click', async () => {
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const msg = document.getElementById('msg');
+                
+                if(!email || !password) { msg.innerText = "اكتب البيانات!"; return; }
+                msg.innerText = "جاري المعالجة...";
+
+                try {
+                    let { error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) {
+                        let { error: suberr } = await supabase.auth.signUp({ email, password });
+                        if (suberr) throw new Error(suberr.message);
+                        msg.innerText = "تم إنشاء الحساب، دوس دخول تاني.";
+                    } else {
+                        document.getElementById('loginScreen').style.display = 'none';
+                        document.getElementById('dashScreen').style.display = 'block';
+                    }
+                } catch (e) {
+                    msg.innerText = e.message;
+                }
+            });
+
+            document.getElementById('outBtn').addEventListener('click', async () => {
+                await supabase.auth.signOut();
+                document.getElementById('dashScreen').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
+            });
+        };
     </script>
 </body>
 </html>
