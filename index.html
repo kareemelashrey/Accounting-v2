@@ -82,74 +82,67 @@
     </div>
 
     <script>
+        <script>
+        // كود كاشف الأخطاء
+        window.onerror = function(msg, url, line, col, error) {
+            alert("خطأ في الكود رقم " + line + ": " + msg);
+            return false;
+        };
+
+        // المفاتيح (تأكد إن علامات التنصيص دي إنجليزي ' ' ومش عربية)
         const SUPABASE_URL = 'https://wjdhikxuwootmsnztmgb.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGhpa3h1d29vdG1zbnp0bWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODg4NTksImV4cCI6MjEwODM2NDg1OX0.SQlTNUsdXHTw6ETUPVS6qpOXpQ50snHv9e0h-GPLzmE';
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        try {
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const loginBtn = document.getElementById('loginBtn');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const btnText = document.getElementById('btnText');
 
-        const loginScreen = document.getElementById('loginScreen');
-        const dashboardScreen = document.getElementById('dashboardScreen');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const loginBtn = document.getElementById('loginBtn');
-        const btnText = document.getElementById('btnText');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userEmailSpan = document.getElementById('userEmail');
+            alert("تم تحميل الكود بنجاح! جاري تجربة الزرار...");
 
-        async function checkSession() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                loginScreen.classList.add('hidden');
-                dashboardScreen.classList.remove('hidden');
-                userEmailSpan.innerText = session.user.email;
-            } else {
-                loginScreen.classList.remove('hidden');
-                dashboardScreen.classList.add('hidden');
-            }
-        }
-        checkSession();
+            loginBtn.addEventListener('click', async () => {
+                const email = emailInput.value;
+                const password = passwordInput.value;
 
-        loginBtn.addEventListener('click', async () => {
-            const email = emailInput.value;
-            const password = passwordInput.value;
-
-            if(!email || !password) {
-                alert("⚠️ اكتب الإيميل والباسورد الأول!");
-                return;
-            }
-
-            loginBtn.disabled = true;
-            btnText.innerText = 'جاري المعالجة...';
-
-            try {
-                const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-
-                if (loginError) {
-                    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
-                    
-                    if (signUpError) {
-                        throw new Error("فشل الدخول والتسجيل: " + signUpError.message);
-                    } else {
-                        alert("✅ تم إنشاء حساب جديد بنجاح!");
-                    }
-                } else {
-                    alert("✅ تم تسجيل الدخول بنجاح!");
+                if(!email || !password) {
+                    alert("⚠️ اكتب الإيميل والباسورد الأول!");
+                    return;
                 }
-                
-                checkSession();
 
-            } catch (error) {
-                alert("❌ المشكلة: " + error.message);
-            } finally {
-                loginBtn.disabled = false;
-                btnText.innerText = 'دخول / إنشاء حساب';
-            }
-        });
+                loginBtn.disabled = true;
+                btnText.innerText = 'جاري المعالجة...';
 
-        logoutBtn.addEventListener('click', async () => {
-            await supabase.auth.signOut();
-            checkSession();
-        });
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    
+                    if (error) {
+                        // لو مفيش حساب، نعمله
+                        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
+                        if (signUpError) throw signUpError;
+                        alert("✅ تم إنشاء حساب جديد بنجاح!");
+                    } else {
+                        alert("✅ تم تسجيل الدخول بنجاح!");
+                    }
+                    
+                    // تحديث الشاشة
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        document.getElementById('loginScreen').classList.add('hidden');
+                        document.getElementById('dashboardScreen').classList.remove('hidden');
+                        document.getElementById('userEmail').innerText = session.user.email;
+                    }
+
+                } catch (err) {
+                    alert("❌ المشكلة: " + err.message);
+                } finally {
+                    loginBtn.disabled = false;
+                    btnText.innerText = 'دخول / إنشاء حساب';
+                }
+            });
+
+        } catch (e) {
+            alert("خطأ فادح: " + e.message);
+        }
     </script>
-</body>
-</html>
