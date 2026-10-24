@@ -2,49 +2,85 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>اختبار الدخول</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>تحميل الملف</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="text-align: center; padding: 50px; font-family: sans-serif;">
-    
-    <h2>اختبار الدخول</h2>
-    <p id="msg" style="color: blue; font-weight: bold;">جاري التحميل...</p>
-    
-    <input type="email" id="email" placeholder="الإيميل" style="padding: 10px; margin: 10px;"><br>
-    <input type="password" id="password" placeholder="الباسورد" style="padding: 10px; margin: 10px;"><br>
-    
-    <button id="btn" style="padding: 15px 30px; font-size: 18px; background: blue; color: white; border: none; border-radius: 5px;">
-        اضغط للدخول
-    </button>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+    <div class="text-center p-8 bg-gray-800 rounded-xl shadow-2xl">
+        <h1 class="text-2xl font-bold mb-4">تحميل ملف البرنامج</h1>
+        <p class="text-gray-400 mb-6">اضغط على الزر لتحميل ملف index.html جاهز للرفع.</p>
+        <button id="dlBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg w-full">
+            تحميل الملف (index.html)
+        </button>
+    </div>
+
+    <script>
+        // الكود الحقيقي للبرنامج (محمي هنا داخل السكريبت عشان ميتلخبطش)
+        const code = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>نظام المحاسبة</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div id="login" class="bg-white p-8 rounded shadow-md w-80 text-center">
+        <h2 class="text-xl font-bold mb-4">تسجيل الدخول</h2>
+        <p id="msg" class="text-red-500 text-sm mb-2"></p>
+        <input type="email" id="email" placeholder="الإيميل" class="w-full p-2 mb-3 border rounded" dir="ltr">
+        <input type="password" id="password" placeholder="الباسورد" class="w-full p-2 mb-4 border rounded" dir="ltr">
+        <button id="btn" class="bg-blue-600 text-white w-full p-2 rounded">دخول</button>
+    </div>
+
+    <div id="dash" class="hidden bg-white p-8 rounded shadow-md text-center">
+        <h2 class="text-2xl text-green-600 font-bold mb-4">تم الدخول بنجاح!</h2>
+        <button id="out" class="bg-red-500 text-white px-4 py-2 rounded">خروج</button>
+    </div>
 
     <script>
         const url = 'https://wjdhikxuwootmsnztmgb.supabase.co';
         const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGhpa3h1d29vdG1zbnp0bWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODg4NTksImV4cCI6MjEwODM2NDg1OX0.SQlTNUsdXHTw6ETUPVS6qpOXpQ50snHv9e0h-GPLzmE';
         const supabase = window.supabase.createClient(url, key);
-        const msg = document.getElementById('msg');
-
-        msg.innerText = "جاري التحميل... الكود شغال!";
 
         document.getElementById('btn').addEventListener('click', async () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const msg = document.getElementById('msg');
             
-            msg.innerText = "جاري محاولة الدخول...";
-            msg.style.color = "orange";
+            if(!email || !password) { msg.innerText = "اكتب البيانات!"; return; }
+            msg.innerText = "جاري...";
 
-            // هنا بنحاول نسجل دخول بس، مفيش إنشاء حساب
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                // لو فشل، هنكتب الخطأ بالظبط
-                msg.innerText = "الخطأ: " + error.message;
-                msg.style.color = "red";
-            } else {
-                // لو نجح
-                msg.innerText = "تم الدخول بنجاح!";
-                msg.style.color = "green";
-                alert("مبروك! إنت مسجل دخول.");
+            try {
+                let { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                    let { error: suberr } = await supabase.auth.signUp({ email, password });
+                    if (suberr) throw new Error(suberr.message);
+                    msg.innerText = "تم إنشاء الحساب، دوس دخول تاني.";
+                } else {
+                    document.getElementById('login').classList.add('hidden');
+                    document.getElementById('dash').classList.remove('hidden');
+                }
+            } catch (e) {
+                msg.innerText = e.message;
             }
+        });
+
+        document.getElementById('out').addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            document.getElementById('dash').classList.add('hidden');
+            document.getElementById('login').classList.remove('hidden');
+        });
+    <\/script>
+</body>
+</html>`;
+
+        document.getElementById('dlBtn').addEventListener('click', () => {
+            const blob = new Blob([code], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'index.html';
+            a.click();
         });
     </script>
 </body>
