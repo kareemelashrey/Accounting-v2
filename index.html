@@ -2,27 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تحميل ملف النظام</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
-    <div class="text-center p-8 bg-gray-800 rounded-xl shadow-2xl">
-        <h1 class="text-2xl font-bold mb-4">تحميل ملف البرنامج</h1>
-        <p class="text-gray-400 mb-6">دوس على الزرار عشان تحمل الملف الجاهز وترفعه على GitHub.</p>
-        <button id="dlBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg w-full">
-            تحميل الملف (index.html)
-        </button>
-    </div>
-
-    <script>
-        // هذا هو كود البرنامج الحقيقي (مخفي هنا عشان الكوبي والبيست)
-        const code = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
     <title>نظام المحاسبة</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
-    <script src="https://cdn.tailwindcss.com"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div id="login" class="bg-white p-8 rounded shadow-md w-80 text-center">
@@ -71,17 +53,6 @@
             await supabase.auth.signOut();
             document.getElementById('dash').classList.add('hidden');
             document.getElementById('login').classList.remove('hidden');
-        });
-    <\/script>
-</body>
-</html>`;
-
-        document.getElementById('dlBtn').addEventListener('click', () => {
-            const blob = new Blob([code], { type: 'text/html' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'index.html';
-            a.click();
         });
     </script>
 </body>
