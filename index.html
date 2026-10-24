@@ -3,75 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام المحاسبة الاحترافي</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>عرض لوحة التحكم</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         body { font-family: 'Cairo', sans-serif; }
-        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
 
-    <!-- 1. شاشة تسجيل الدخول -->
+    <!-- شاشة الدخول -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-white">مرحباً بعودتك</h1>
-            </div>
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-slate-300 text-sm font-semibold mb-2">البريد الإلكتروني</label>
-                    <input type="email" id="email" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="name@company.com" dir="ltr">
-                </div>
-                <div>
-                    <label class="block text-slate-300 text-sm font-semibold mb-2">كلمة المرور</label>
-                    <input type="password" id="password" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" dir="ltr">
-                </div>
-                <button id="loginBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center">
-                    <span id="btnText">دخول / إنشاء حساب</span>
-                </button>
-            </div>
+        <div class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl relative text-center">
+            <h1 class="text-3xl font-bold text-white mb-6">مرحباً بعودتك</h1>
+            <button onclick="showDashboard()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg">
+                دخول تجريبي (للعرض فقط)
+            </button>
         </div>
     </div>
 
-    <!-- 2. لوحة التحكم -->
+    <!-- لوحة التحكم -->
     <div id="dashboardScreen" class="hidden min-h-screen flex bg-slate-900">
-        <!-- القائمة الجانبية -->
         <aside class="w-64 bg-slate-800 border-l border-slate-700 flex flex-col hidden md:flex">
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900/50">
                 <span class="text-xl font-bold text-blue-500">نظامي المحاسبي</span>
             </div>
-            <nav class="flex-1 overflow-y-auto py-4">
+            <nav class="flex-1 py-4">
                 <p class="px-4 text-xs font-bold text-slate-500 mb-2">العمليات</p>
-                <a href="#" class="bg-slate-700 text-blue-400 border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 text-sm font-semibold">
-                    الرئيسية
-                </a>
-                <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">
-                    المبيعات
-                </a>
-                <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">
-                    الفواتير
-                </a>
-                <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">
-                    المخزون
-                </a>
+                <a href="#" class="bg-slate-700 text-blue-400 border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الرئيسية</a>
+                <a href="#" class="text-slate-300 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات</a>
+                <a href="#" class="text-slate-300 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الفواتير</a>
+                <a href="#" class="text-slate-300 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المخزون</a>
             </nav>
-            <div class="p-4 border-t border-slate-700">
-                <button id="logoutBtn" class="w-full bg-red-500/10 text-red-400 hover:bg-red-500/20 py-2 rounded-lg font-bold transition-colors">
-                    تسجيل خروج
-                </button>
-            </div>
         </aside>
 
-        <!-- المحتوى الرئيسي -->
         <main class="flex-1 flex flex-col">
-            <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6">
+            <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center px-6">
                 <h2 class="text-lg font-bold text-white">لوحة التحكم</h2>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-slate-400">مرحباً، <span id="userEmail" class="text-blue-400 font-bold">...</span></span>
-                </div>
             </header>
             <div class="p-6">
                 <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">
@@ -82,67 +51,11 @@
     </div>
 
     <script>
-        <script>
-        // كود كاشف الأخطاء
-        window.onerror = function(msg, url, line, col, error) {
-            alert("خطأ في الكود رقم " + line + ": " + msg);
-            return false;
-        };
-
-        // المفاتيح (تأكد إن علامات التنصيص دي إنجليزي ' ' ومش عربية)
-        const SUPABASE_URL = 'https://wjdhikxuwootmsnztmgb.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGhpa3h1d29vdG1zbnp0bWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODg4NTksImV4cCI6MjEwODM2NDg1OX0.SQlTNUsdXHTw6ETUPVS6qpOXpQ50snHv9e0h-GPLzmE';
-
-        try {
-            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const loginBtn = document.getElementById('loginBtn');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const btnText = document.getElementById('btnText');
-
-            alert("تم تحميل الكود بنجاح! جاري تجربة الزرار...");
-
-            loginBtn.addEventListener('click', async () => {
-                const email = emailInput.value;
-                const password = passwordInput.value;
-
-                if(!email || !password) {
-                    alert("⚠️ اكتب الإيميل والباسورد الأول!");
-                    return;
-                }
-
-                loginBtn.disabled = true;
-                btnText.innerText = 'جاري المعالجة...';
-
-                try {
-                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                    
-                    if (error) {
-                        // لو مفيش حساب، نعمله
-                        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
-                        if (signUpError) throw signUpError;
-                        alert("✅ تم إنشاء حساب جديد بنجاح!");
-                    } else {
-                        alert("✅ تم تسجيل الدخول بنجاح!");
-                    }
-                    
-                    // تحديث الشاشة
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (session) {
-                        document.getElementById('loginScreen').classList.add('hidden');
-                        document.getElementById('dashboardScreen').classList.remove('hidden');
-                        document.getElementById('userEmail').innerText = session.user.email;
-                    }
-
-                } catch (err) {
-                    alert("❌ المشكلة: " + err.message);
-                } finally {
-                    loginBtn.disabled = false;
-                    btnText.innerText = 'دخول / إنشاء حساب';
-                }
-            });
-
-        } catch (e) {
-            alert("خطأ فادح: " + e.message);
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboardScreen').classList.remove('hidden');
+            document.getElementById('dashboardScreen').classList.add('flex');
         }
     </script>
+</body>
+</html>
