@@ -2,85 +2,135 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تحميل الملف</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام المحاسبة الاحترافي</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
-    <div class="text-center p-8 bg-gray-800 rounded-xl shadow-2xl">
-        <h1 class="text-2xl font-bold mb-4">تحميل ملف البرنامج</h1>
-        <p class="text-gray-400 mb-6">اضغط على الزر لتحميل ملف index.html جاهز للرفع.</p>
-        <button id="dlBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg w-full">
-            تحميل الملف (index.html)
-        </button>
+<body class="bg-slate-900 text-white min-h-screen">
+
+    <div id="loginScreen" style="display: flex;" class="min-h-screen items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-white">مرحباً بعودتك</h1>
+            </div>
+            <div id="errorBox" class="hidden bg-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center mb-4 font-bold"></div>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-slate-300 text-sm font-semibold mb-2">البريد الإلكتروني</label>
+                    <input type="email" id="email" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="name@company.com" dir="ltr">
+                </div>
+                <div>
+                    <label class="block text-slate-300 text-sm font-semibold mb-2">كلمة المرور</label>
+                    <input type="password" id="password" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" dir="ltr">
+                </div>
+                <button id="loginBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center">
+                    <span id="btnText">دخول / إنشاء حساب</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboardScreen" style="display: none;" class="min-h-screen bg-slate-900">
+        <aside class="w-64 bg-slate-800 border-l border-slate-700 flex flex-col hidden md:flex fixed h-full right-0 top-0">
+            <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900/50">
+                <span class="text-xl font-bold text-blue-500">نظامي المحاسبي</span>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <p class="px-4 text-xs font-bold text-slate-500 mb-2">العمليات</p>
+                <a href="#" class="bg-slate-700 text-blue-400 border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الرئيسية</a>
+                <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات</a>
+                <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الفواتير</a>
+                <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المخزون</a>
+            </nav>
+            <div class="p-4 border-t border-slate-700">
+                <button id="logoutBtn" class="w-full bg-red-500/10 text-red-400 hover:bg-red-500/20 py-2 rounded-lg font-bold transition-colors">تسجيل خروج</button>
+            </div>
+        </aside>
+        <main class="mr-0 md:mr-64 min-h-screen flex flex-col">
+            <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6">
+                <h2 class="text-lg font-bold text-white">لوحة التحكم</h2>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-slate-400">مرحباً، <span id="userEmail" class="text-blue-400 font-bold">...</span></span>
+                </div>
+            </header>
+            <div class="p-6">
+                <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">
+                    هنا ستظهر آخر الفواتير والعمليات
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        // الكود الحقيقي للبرنامج (محمي هنا داخل السكريبت عشان ميتلخبطش)
-        const code = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>نظام المحاسبة</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
-    <script src="https://cdn.tailwindcss.com"><\/script>
-</head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-    <div id="login" class="bg-white p-8 rounded shadow-md w-80 text-center">
-        <h2 class="text-xl font-bold mb-4">تسجيل الدخول</h2>
-        <p id="msg" class="text-red-500 text-sm mb-2"></p>
-        <input type="email" id="email" placeholder="الإيميل" class="w-full p-2 mb-3 border rounded" dir="ltr">
-        <input type="password" id="password" placeholder="الباسورد" class="w-full p-2 mb-4 border rounded" dir="ltr">
-        <button id="btn" class="bg-blue-600 text-white w-full p-2 rounded">دخول</button>
-    </div>
+        const SUPABASE_URL = 'https://wjdhikxuwootmsnztmgb.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGhpa3h1d29vdG1zbnp0bWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODg4NTksImV4cCI6MjEwODM2NDg1OX0.SQlTNUsdXHTw6ETUPVS6qpOXpQ50snHv9e0h-GPLzmE';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <div id="dash" class="hidden bg-white p-8 rounded shadow-md text-center">
-        <h2 class="text-2xl text-green-600 font-bold mb-4">تم الدخول بنجاح!</h2>
-        <button id="out" class="bg-red-500 text-white px-4 py-2 rounded">خروج</button>
-    </div>
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboardScreen = document.getElementById('dashboardScreen');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userEmailSpan = document.getElementById('userEmail');
+        const errorBox = document.getElementById('errorBox');
 
-    <script>
-        const url = 'https://wjdhikxuwootmsnztmgb.supabase.co';
-        const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGhpa3h1d29vdG1zbnp0bWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODg4NTksImV4cCI6MjEwODM2NDg1OX0.SQlTNUsdXHTw6ETUPVS6qpOXpQ50snHv9e0h-GPLzmE';
-        const supabase = window.supabase.createClient(url, key);
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                loginScreen.style.display = 'none';
+                dashboardScreen.style.display = 'block';
+                userEmailSpan.innerText = session.user.email;
+            } else {
+                loginScreen.style.display = 'flex';
+                dashboardScreen.style.display = 'none';
+            }
+        }
+        checkSession();
 
-        document.getElementById('btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const msg = document.getElementById('msg');
-            
-            if(!email || !password) { msg.innerText = "اكتب البيانات!"; return; }
-            msg.innerText = "جاري...";
+        loginBtn.addEventListener('click', async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if(!email || !password) {
+                errorBox.innerText = "⚠️ اكتب الإيميل والباسورد الأول!";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            errorBox.classList.add('hidden');
+            loginBtn.disabled = true;
+            btnText.innerText = 'جاري المعالجة...';
 
             try {
-                let { error } = await supabase.auth.signInWithPassword({ email, password });
+                let { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) {
-                    let { error: suberr } = await supabase.auth.signUp({ email, password });
-                    if (suberr) throw new Error(suberr.message);
-                    msg.innerText = "تم إنشاء الحساب، دوس دخول تاني.";
+                    let signUpRes = await supabase.auth.signUp({ email, password });
+                    if (signUpRes.error) throw new Error(signUpRes.error.message);
+                    alert("✅ تم إنشاء حسابك الجديد بنجاح! جاري الدخول...");
                 } else {
-                    document.getElementById('login').classList.add('hidden');
-                    document.getElementById('dash').classList.remove('hidden');
+                    alert("✅ تم تسجيل الدخول بنجاح!");
                 }
-            } catch (e) {
-                msg.innerText = e.message;
+                await checkSession();
+            } catch (err) {
+                errorBox.innerText = "❌ " + err.message;
+                errorBox.classList.remove('hidden');
+            } finally {
+                loginBtn.disabled = false;
+                btnText.innerText = 'دخول / إنشاء حساب';
             }
         });
 
-        document.getElementById('out').addEventListener('click', async () => {
+        logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
-            document.getElementById('dash').classList.add('hidden');
-            document.getElementById('login').classList.remove('hidden');
-        });
-    <\/script>
-</body>
-</html>`;
-
-        document.getElementById('dlBtn').addEventListener('click', () => {
-            const blob = new Blob([code], { type: 'text/html' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'index.html';
-            a.click();
+            await checkSession();
         });
     </script>
 </body>
