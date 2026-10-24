@@ -4,41 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام المحاسبة الاحترافي</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- ⚠️ هنا التغيير: استخدمنا أحدث إصدار من المكتبة اللي بيفهم المفتاح الجديد -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-        body { font-family: 'Cairo', sans-serif; }
-        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen">
+<body class="text-white flex items-center justify-center p-4">
 
     <!-- 1. شاشة الدخول -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-white">مرحباً بعودتك</h1>
+    <div id="loginScreen" class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl relative" style="display: block;">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-white">مرحباً بعودتك</h1>
+        </div>
+        
+        <div id="errorBox" class="hidden bg-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center mb-4 font-bold"></div>
+
+        <div class="space-y-5">
+            <div>
+                <label class="block text-slate-300 text-sm font-semibold mb-2">البريد الإلكتروني</label>
+                <input type="email" id="email" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="name@company.com" dir="ltr">
             </div>
-            <div id="errorBox" class="hidden bg-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center mb-4 font-bold"></div>
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-slate-300 text-sm font-semibold mb-2">البريد الإلكتروني</label>
-                    <input type="email" id="email" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="name@company.com" dir="ltr">
-                </div>
-                <div>
-                    <label class="block text-slate-300 text-sm font-semibold mb-2">كلمة المرور</label>
-                    <input type="password" id="password" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" dir="ltr">
-                </div>
-                <button id="loginBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center">
-                    <span id="btnText">دخول / إنشاء حساب</span>
-                </button>
+            <div>
+                <label class="block text-slate-300 text-sm font-semibold mb-2">كلمة المرور</label>
+                <input type="password" id="password" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" dir="ltr">
             </div>
+            <button id="loginBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center">
+                <span id="btnText">دخول / إنشاء حساب</span>
+            </button>
         </div>
     </div>
 
     <!-- 2. لوحة التحكم -->
-    <div id="dashboardScreen" class="hidden min-h-screen bg-slate-900">
+    <div id="dashboardScreen" class="min-h-screen bg-slate-900 w-full absolute top-0 right-0" style="display: none;">
         <aside class="w-64 bg-slate-800 border-l border-slate-700 flex flex-col hidden md:flex fixed h-full right-0 top-0">
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900/50">
                 <span class="text-xl font-bold text-blue-500">نظامي المحاسبي</span>
@@ -71,10 +89,10 @@
     </div>
 
     <script>
-        // ⚠️ تم تحديث المفاتيح
-        const SUPABASE_URL = 'https://wjdhikxuwootmsnztmgb.supabase.co';
+        // المفاتيح الجديدة اللي إنت بعتها
+        const SUPABASE_URL = 'https://wjdhikxuwootmsnztmgb.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_6JNfXXpQLxlxSdyF4XWKng_ZYaNccSE';
-
+        
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const loginScreen = document.getElementById('loginScreen');
@@ -90,12 +108,12 @@
         async function checkSession() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                loginScreen.classList.add('hidden');
-                dashboardScreen.classList.remove('hidden');
+                loginScreen.style.display = 'none';
+                dashboardScreen.style.display = 'block';
                 userEmailSpan.innerText = session.user.email;
             } else {
-                loginScreen.classList.remove('hidden');
-                dashboardScreen.classList.add('hidden');
+                loginScreen.style.display = 'block';
+                dashboardScreen.style.display = 'none';
             }
         }
         checkSession();
