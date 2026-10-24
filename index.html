@@ -3,36 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم</title>
+    <title>نظام المحاسبة</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col md:flex-row">
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
 
-    <!-- القائمة الجانبية -->
-    <aside class="w-full md:w-64 bg-slate-800 border-l border-slate-700 flex flex-col">
-        <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900/50">
-            <span class="text-xl font-bold text-blue-500">نظامي المحاسبي</span>
-        </div>
-        <nav class="flex-1 overflow-y-auto py-4">
-            <p class="px-4 text-xs font-bold text-slate-500 mb-2">العمليات</p>
-            <a href="#" class="bg-slate-700 text-blue-400 border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الرئيسية</a>
-            <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات</a>
-            <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الفواتير</a>
-            <a href="#" class="text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المخزون</a>
-        </nav>
-    </aside>
-
-    <!-- المحتوى الرئيسي -->
-    <main class="flex-1 flex flex-col p-6">
-        <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6 mb-6 rounded-xl">
-            <h2 class="text-lg font-bold text-white">لوحة التحكم</h2>
-            <span class="text-sm text-slate-400">مرحباً، <span class="text-blue-400 font-bold">المدير</span></span>
-        </header>
+    <div id="loginScreen" class="bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-700">
+        <h1 class="text-2xl font-bold text-center mb-6">تسجيل الدخول</h1>
+        <div id="msg" class="hidden text-center p-2 mb-4 rounded text-sm"></div>
         
-        <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">
-            هنا ستظهر آخر الفواتير والعمليات
-        </div>
-    </main>
+        <input type="email" id="email" placeholder="الإيميل" class="w-full p-3 mb-4 rounded bg-slate-700 border border-slate-600" dir="ltr">
+        <input type="password" id="password" placeholder="الباسورد" class="w-full p-3 mb-6 rounded bg-slate-700 border border-slate-600" dir="ltr">
+        
+        <button id="btn" class="w-full bg-blue-600 hover:bg-blue-500 p-3 rounded font-bold transition">دخول / إنشاء حساب</button>
+    </div>
 
+    <div id="dashScreen" style="display: none;" class="bg-slate-800 p-8 rounded-2xl shadow-xl text-center w-full max-w-md border border-slate-700">
+        <h1 class="text-2xl text-green-400 font-bold mb-4">تم الدخول بنجاح!</h1>
+        <p class="mb-6">إنت الآن في لوحة التحكم.</p>
+        <button id="outBtn" class="bg-red-600 hover:bg-red-500 px-6 py-2 rounded font-bold transition">تسجيل خروج</button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wjdhikxuwootmsnztmgb.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGhpa3h1d29vdG1zbnp0bWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODg1OTksImV4cCI6MjEwODM2NDg1OX0.SQlTNUsdXHTw6ETUPVS6qpOXpQ50snHv9e0h-GPLzmE';
+        
+        const msg = document.getElementById('msg');
+
+        // ننتظر تحميل المكتبة، لو ملقيناهاش بعد 3 ثواني، نظهر رسالة
+        const checkLibrary = setInterval(async () => {
+            if (window.supabase) {
+                clearInterval(checkLibrary);
+                
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                document.getElementById('btn').addEventListener('click', async () => {
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value.trim();
+                    
+                    if(!email || !password) {
+                        msg.innerText = "اكتب البيانات!";
+                        msg.className = "text-red-400 bg-red-900/50 block p-2 mb-4 rounded text-center text-sm";
+                        return;
+                    }
+
+                    msg.innerText = "جاري المعالجة...";
+                    msg.className = "text-blue-400 bg-blue-900/50 block p-2 mb-4 rounded text-center text-sm";
+
+                    try {
+                        let { error } = await supabase.auth.signInWithPassword({ email, password });
+                        if (error) {
+                            let { error: suberr } = await supabase.auth.signUp({ email, password });
+                            if (suberr) throw new Error(suberr.message);
+                            msg.innerText = "تم إنشاء الحساب! دوس دخول تاني.";
+                            msg.className = "text-green-400 bg-green-900/50 block p-2 mb-4 rounded text-center text-sm";
+                        } else {
+                            document.getElementById('loginScreen').style.display = 'none';
+                            document.getElementById('dashScreen').style.display = 'block';
+                        }
+                    } catch (e) {
+                        msg.innerText = e.message;
+                        msg.className = "text-red-400 bg-red-900/50 block p-2 mb-4 rounded text-center text-sm";
+                    }
+                });
+
+                document.getElementById('outBtn').addEventListener('click', async () => {
+                    await supabase.auth.signOut();
+                    document.getElementById('dashScreen').style.display = 'none';
+                    document.getElementById('loginScreen').style.display = 'block';
+                    msg.className = "hidden";
+                });
+            }
+        }, 500);
+
+        // لو المكتبة مظهرتش بعد 5 ثواني، نظهر رسالة للمستخدم
+        setTimeout(() => {
+            clearInterval(checkLibrary);
+            if (!window.supabase) {
+                msg.innerText = "خطأ: فشل تحميل مكتبة Supabase (تأكد من الإنترنت).";
+                msg.className = "text-red-400 bg-red-900/50 block p-2 mb-4 rounded text-center text-sm";
+            }
+        }, 5000);
+    </script>
 </body>
 </html>
