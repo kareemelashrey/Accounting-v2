@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام المحاسبة | الأصناف والمخزون</title>
+    <title>نظام المحاسبة | العملاء</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -16,7 +16,7 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
 
-    <!-- شاشة الدخول -->
+    <!-- 1. شاشة الدخول -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
         <div class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl">
             <h1 class="text-3xl font-bold text-center mb-8">مرحباً بعودتك</h1>
@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <!-- لوحة التحكم -->
+    <!-- 2. لوحة التحكم -->
     <div id="dashboardScreen" class="hidden min-h-screen bg-slate-900">
         <!-- القائمة الجانبية -->
         <aside class="w-64 bg-slate-800 border-l border-slate-700 flex flex-col hidden md:flex fixed h-full right-0 top-0">
@@ -40,6 +40,7 @@
                 <p class="px-4 text-xs font-bold text-slate-500 mb-2">العمليات</p>
                 <a href="#" onclick="showPage('home', this)" class="menu-item bg-slate-700 text-blue-400 border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الرئيسية</a>
                 <a href="#" onclick="showPage('inventory', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المخزون (الأصناف)</a>
+                <a href="#" onclick="showPage('customers', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">العملاء</a>
                 <a href="#" onclick="showPage('sales', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات</a>
                 <a href="#" onclick="showPage('invoices', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الفواتير</a>
                 <a href="#" onclick="showPage('cash', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الخزينة</a>
@@ -62,30 +63,35 @@
                 <!-- صفحة الرئيسية -->
                 <div id="page-home" class="page-content active">
                     <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">
-                        مرحباً بك في نظامك المحاسبي. اختر "المخزون" من القائمة الجانبية للبدء.
+                        مرحباً بك في نظامك المحاسبي. اختر من القائمة الجانبية.
                     </div>
                 </div>
 
-                <!-- صفحة الأصناف (المخزون) - الشغل الجديد -->
+                <!-- صفحة المخزون -->
                 <div id="page-inventory" class="page-content">
+                    <div class="bg-slate-800 rounded-xl p-8 text-center text-slate-400">شاشة المخزون (تم تجهيزها سابقاً)</div>
+                </div>
+
+                <!-- صفحة العملاء (الشغل الجديد) -->
+                <div id="page-customers" class="page-content">
                     <!-- كروت الإحصائيات -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                            <p class="text-slate-400 text-sm font-bold mb-2">إجمالي عدد الأصناف</p>
-                            <h3 id="totalProducts" class="text-3xl font-bold text-white">0</h3>
+                            <p class="text-slate-400 text-sm font-bold mb-2">إجمالي عدد العملاء</p>
+                            <h3 id="totalCustomers" class="text-3xl font-bold text-white">0</h3>
                         </div>
                         <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                            <p class="text-slate-400 text-sm font-bold mb-2">إجمالي قيمة المخزون (بيع)</p>
-                            <h3 id="totalValue" class="text-3xl font-bold text-green-400">0.00 ج.م</h3>
+                            <p class="text-slate-400 text-sm font-bold mb-2">إجمالي أرصدة العملاء</p>
+                            <h3 id="totalBalance" class="text-3xl font-bold text-green-400">0.00 ج.م</h3>
                         </div>
                     </div>
 
                     <!-- زرار الإضافة والبحث -->
                     <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
-                        <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold transition w-full md:w-auto">
-                            + إضافة صنف جديد
+                        <button onclick="openCustomerModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold transition w-full md:w-auto">
+                            + إضافة عميل جديد
                         </button>
-                        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="ابحث باسم الصنف..." class="bg-slate-800 border border-slate-600 text-white rounded-lg px-4 py-2 w-full md:w-64">
+                        <input type="text" id="searchCustomer" onkeyup="filterCustomerTable()" placeholder="ابحث باسم العميل..." class="bg-slate-800 border border-slate-600 text-white rounded-lg px-4 py-2 w-full md:w-64">
                     </div>
 
                     <!-- الجدول -->
@@ -94,15 +100,13 @@
                             <table class="w-full text-right">
                                 <thead class="bg-slate-900 text-slate-400 text-sm">
                                     <tr>
-                                        <th class="p-4">اسم الصنف</th>
-                                        <th class="p-4">الكود</th>
-                                        <th class="p-4">سعر الشراء</th>
-                                        <th class="p-4">سعر البيع</th>
-                                        <th class="p-4">الكمية</th>
+                                        <th class="p-4">اسم العميل</th>
+                                        <th class="p-4">رقم الهاتف</th>
+                                        <th class="p-4">الرصيد الحالي</th>
                                     </tr>
                                 </thead>
-                                <tbody id="productsTable" class="divide-y divide-slate-700">
-                                    <tr><td colspan="5" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
+                                <tbody id="customersTable" class="divide-y divide-slate-700">
+                                    <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -110,36 +114,26 @@
                 </div>
 
                 <!-- باقي الصفحات -->
-                <div id="page-sales" class="page-content">
-                    <div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة المبيعات (قريباً)</div>
-                </div>
-                <div id="page-invoices" class="page-content">
-                    <div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة الفواتير (قريباً)</div>
-                </div>
-                <div id="page-cash" class="page-content">
-                    <div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة الخزينة (قريباً)</div>
-                </div>
+                <div id="page-sales" class="page-content"><div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة المبيعات (قريباً)</div></div>
+                <div id="page-invoices" class="page-content"><div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة الفواتير (قريباً)</div></div>
+                <div id="page-cash" class="page-content"><div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة الخزينة (قريباً)</div></div>
             </div>
         </main>
     </div>
 
-    <!-- نافذة إضافة صنف (Modal) -->
-    <div id="productModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+    <!-- نافذة إضافة عميل (Modal) -->
+    <div id="customerModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
         <div class="bg-slate-800 rounded-xl p-6 w-full max-w-md border border-slate-700">
-            <h3 class="text-xl font-bold mb-4">إضافة صنف جديد</h3>
-            <div id="modalError" class="hidden text-red-400 text-sm mb-2"></div>
+            <h3 class="text-xl font-bold mb-4">إضافة عميل جديد</h3>
+            <div id="customerModalError" class="hidden text-red-400 text-sm mb-2"></div>
             <div class="space-y-4">
-                <input type="text" id="pName" placeholder="اسم الصنف" class="w-full bg-slate-700 p-3 rounded border border-slate-600">
-                <input type="text" id="pSku" placeholder="الكود (اختياري)" class="w-full bg-slate-700 p-3 rounded border border-slate-600">
-                <div class="flex gap-4">
-                    <input type="number" id="pBuy" placeholder="سعر الشراء" class="w-1/2 bg-slate-700 p-3 rounded border border-slate-600">
-                    <input type="number" id="pSell" placeholder="سعر البيع" class="w-1/2 bg-slate-700 p-3 rounded border border-slate-600">
-                </div>
-                <input type="number" id="pStock" placeholder="الكمية الحالية" class="w-full bg-slate-700 p-3 rounded border border-slate-600">
+                <input type="text" id="cName" placeholder="اسم العميل" class="w-full bg-slate-700 p-3 rounded border border-slate-600">
+                <input type="text" id="cPhone" placeholder="رقم الهاتف" class="w-full bg-slate-700 p-3 rounded border border-slate-600" dir="ltr">
+                <input type="number" id="cBalance" placeholder="الرصيد الافتتاحي (اختياري)" class="w-full bg-slate-700 p-3 rounded border border-slate-600" dir="ltr">
             </div>
             <div class="flex gap-2 mt-6">
-                <button onclick="addProduct()" class="bg-blue-600 hover:bg-blue-500 flex-1 py-2 rounded font-bold">حفظ</button>
-                <button onclick="closeModal()" class="bg-slate-600 hover:bg-slate-500 flex-1 py-2 rounded font-bold">إلغاء</button>
+                <button onclick="addCustomer()" class="bg-blue-600 hover:bg-blue-500 flex-1 py-2 rounded font-bold">حفظ</button>
+                <button onclick="closeCustomerModal()" class="bg-slate-600 hover:bg-slate-500 flex-1 py-2 rounded font-bold">إلغاء</button>
             </div>
         </div>
     </div>
@@ -150,6 +144,8 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_6JNfXXpQLxlxSdyF4XWKng_ZYaNccSE';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let currentCompanyId = null;
+
         // عناصر
         const loginScreen = document.getElementById('loginScreen');
         const dashboardScreen = document.getElementById('dashboardScreen');
@@ -159,7 +155,7 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const userEmailSpan = document.getElementById('userEmail');
         const errorBox = document.getElementById('errorBox');
-        const productsTable = document.getElementById('productsTable');
+        const customersTable = document.getElementById('customersTable');
 
         // التنقل
         function showPage(pageId, element) {
@@ -175,112 +171,108 @@
                 element.classList.add('bg-slate-700', 'text-blue-400', 'border-r-4', 'border-blue-500');
             }
 
-            const titles = { 'home': 'لوحة التحكم', 'inventory': 'الأصناف والمخزون', 'sales': 'المبيعات', 'invoices': 'الفواتير', 'cash': 'الخزينة' };
+            const titles = { 'home': 'لوحة التحكم', 'inventory': 'المخزون', 'customers': 'العملاء', 'sales': 'المبيعات', 'invoices': 'الفواتير', 'cash': 'الخزينة' };
             document.getElementById('pageTitle').innerText = titles[pageId];
 
-            if(pageId === 'inventory') loadProducts();
+            if(pageId === 'customers') loadCustomers();
         }
 
-        // جلب الأصناف من قاعدة البيانات
-        async function loadProducts() {
-            productsTable.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>';
+        // جلب الشركة الافتراضية أول ما المستخدم يدخل
+        async function fetchCompany() {
+            const { data, error } = await supabase.from('companies').select('id').limit(1).single();
+            if (data) currentCompanyId = data.id;
+        }
+
+        // جلب العملاء
+        async function loadCustomers() {
+            customersTable.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>';
             
-            const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
             
             if (error) {
-                productsTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">خطأ: ${error.message}</td></tr>`;
+                customersTable.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-500">خطأ: ${error.message}</td></tr>`;
                 return;
             }
 
             if (data.length === 0) {
-                productsTable.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد أصناف. اضغط على "إضافة صنف جديد".</td></tr>';
-                document.getElementById('totalProducts').innerText = '0';
-                document.getElementById('totalValue').innerText = '0.00 ج.م';
+                customersTable.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا يوجد عملاء. اضغط على "إضافة عميل جديد".</td></tr>';
+                document.getElementById('totalCustomers').innerText = '0';
+                document.getElementById('totalBalance').innerText = '0.00 ج.م';
                 return;
             }
 
-            // حساب الإحصائيات
-            document.getElementById('totalProducts').innerText = data.length;
-            let totalValue = 0;
-            data.forEach(p => { totalValue += (Number(p.selling_price) * Number(p.current_stock || 0)); });
-            document.getElementById('totalValue').innerText = totalValue.toFixed(2) + ' ج.م';
+            document.getElementById('totalCustomers').innerText = data.length;
+            let totalBalance = 0;
+            data.forEach(c => { totalBalance += Number(c.balance || 0); });
+            document.getElementById('totalBalance').innerText = totalBalance.toFixed(2) + ' ج.م';
 
-            // رسم الجدول
-            productsTable.innerHTML = data.map(p => `
+            customersTable.innerHTML = data.map(c => `
                 <tr class="hover:bg-slate-700/50 transition">
-                    <td class="p-4 font-bold">${p.name}</td>
-                    <td class="p-4 text-slate-400">${p.sku || '-'}</td>
-                    <td class="p-4 text-slate-400">${Number(p.cost_price || 0).toFixed(2)}</td>
-                    <td class="p-4 text-blue-400 font-bold">${Number(p.selling_price || 0).toFixed(2)}</td>
-                    <td class="p-4 ${p.current_stock > 0 ? 'text-green-400' : 'text-red-400'}">${p.current_stock || 0}</td>
+                    <td class="p-4 font-bold">${c.name}</td>
+                    <td class="p-4 text-slate-400" dir="ltr">${c.phone || '-'}</td>
+                    <td class="p-4 font-bold ${c.balance > 0 ? 'text-green-400' : (c.balance < 0 ? 'text-red-400' : 'text-slate-400')}">${Number(c.balance || 0).toFixed(2)} ج.م</td>
                 </tr>
             `).join('');
         }
 
-        // إضافة صنف جديد
-        async function addProduct() {
-            const name = document.getElementById('pName').value.trim();
-            const sku = document.getElementById('pSku').value.trim();
-            const buy = document.getElementById('pBuy').value;
-            const sell = document.getElementById('pSell').value;
-            const stock = document.getElementById('pStock').value;
-            const modalError = document.getElementById('modalError');
+        // إضافة عميل
+        async function addCustomer() {
+            const name = document.getElementById('cName').value.trim();
+            const phone = document.getElementById('cPhone').value.trim();
+            const balance = document.getElementById('cBalance').value;
+            const modalError = document.getElementById('customerModalError');
 
-            if(!name) { modalError.innerText = "اكتب اسم الصنف!"; modalError.classList.remove('hidden'); return; }
+            if(!name) { modalError.innerText = "اكتب اسم العميل!"; modalError.classList.remove('hidden'); return; }
+            if(!currentCompanyId) { modalError.innerText = "خطأ: لم يتم العثور على الشركة!"; modalError.classList.remove('hidden'); return; }
             
             modalError.classList.add('hidden');
 
-            const { error } = await supabase.from('products').insert([{
+            const { error } = await supabase.from('customers').insert([{
                 name: name,
-                sku: sku || null,
-                cost_price: buy ? parseFloat(buy) : 0,
-                selling_price: sell ? parseFloat(sell) : 0,
-                current_stock: stock ? parseFloat(stock) : 0
+                phone: phone || null,
+                balance: balance ? parseFloat(balance) : 0,
+                company_id: currentCompanyId // ربط العميل بالشركة
             }]);
 
             if (error) {
                 modalError.innerText = "خطأ: " + error.message;
                 modalError.classList.remove('hidden');
             } else {
-                closeModal();
-                loadProducts(); // إعادة تحميل الجدول
+                closeCustomerModal();
+                loadCustomers();
             }
         }
 
-        // نافذة الإضافة
-        function openModal() {
-            document.getElementById('productModal').classList.remove('hidden');
-            document.getElementById('productModal').classList.add('flex');
-            document.getElementById('pName').value = '';
-            document.getElementById('pSku').value = '';
-            document.getElementById('pBuy').value = '';
-            document.getElementById('pSell').value = '';
-            document.getElementById('pStock').value = '';
-            document.getElementById('modalError').classList.add('hidden');
+        function openCustomerModal() {
+            document.getElementById('customerModal').classList.remove('hidden');
+            document.getElementById('customerModal').classList.add('flex');
+            document.getElementById('cName').value = '';
+            document.getElementById('cPhone').value = '';
+            document.getElementById('cBalance').value = '';
+            document.getElementById('customerModalError').classList.add('hidden');
         }
-        function closeModal() {
-            document.getElementById('productModal').classList.add('hidden');
-            document.getElementById('productModal').classList.remove('flex');
+        function closeCustomerModal() {
+            document.getElementById('customerModal').classList.add('hidden');
+            document.getElementById('customerModal').classList.remove('flex');
         }
 
-        // البحث في الجدول
-        function filterTable() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const rows = productsTable.getElementsByTagName('tr');
+        function filterCustomerTable() {
+            const input = document.getElementById('searchCustomer').value.toLowerCase();
+            const rows = customersTable.getElementsByTagName('tr');
             for (let i = 0; i < rows.length; i++) {
                 const text = rows[i].innerText.toLowerCase();
                 rows[i].style.display = text.includes(input) ? '' : 'none';
             }
         }
 
-        // التحقق من الجلسة
         async function checkSession() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 loginScreen.classList.add('hidden');
                 dashboardScreen.classList.remove('hidden');
                 userEmailSpan.innerText = session.user.email;
-                loadProducts();
+                await fetchCompany(); // جلب الشركة
+                loadCustomers(); // تحميل العملاء مبدئياً
             } else {
                 loginScreen.classList.remove('hidden');
                 dashboardScreen.classList.add('hidden');
@@ -288,7 +280,6 @@
         }
         checkSession();
 
-        // تسجيل الدخول
         loginBtn.addEventListener('click', async () => {
             const email = emailInput.value.trim();
             const password = passwordInput.value.trim();
@@ -310,7 +301,6 @@
             }
         });
 
-        // الخروج
         logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
             await checkSession();
