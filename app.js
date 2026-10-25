@@ -5,12 +5,10 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentCompanyId = null, invoiceItems = [], allProducts = [], allCustomers = [], allWallets = [];
 let isRegisterMode = false;
 
-// عناصر الشاشة
 const loginScreen = document.getElementById('loginScreen');
 const dashboardScreen = document.getElementById('dashboardScreen');
 const userEmailSpan = document.getElementById('userEmail');
 
-// دالة التنقل
 function showPage(pageId, element) {
     document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
     document.getElementById('page-' + pageId).classList.add('active');
@@ -23,9 +21,9 @@ function showPage(pageId, element) {
     if(pageId === 'sales') loadInvoiceData();
     if(pageId === 'cash') loadWallets();
     if(pageId === 'reports') loadReports();
+    if(pageId === 'returns') loadReturnInvoices();
 }
 
-// جلب الشركة
 async function fetchCompany() {
     const { data: { user } } = await supabase.auth.getUser();
     if(user) {
@@ -34,7 +32,12 @@ async function fetchCompany() {
     }
 }
 
-// تسجيل الدخول
+async function checkSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if(session) { loginScreen.classList.add('hidden'); dashboardScreen.classList.remove('hidden'); userEmailSpan.innerText = session.user.email; await fetchCompany(); }
+    else { loginScreen.classList.remove('hidden'); dashboardScreen.classList.add('hidden'); }
+}
+
 document.getElementById('toggleRegisterBtn').onclick = () => {
     isRegisterMode = !isRegisterMode;
     document.getElementById('companyFields').classList.toggle('hidden');
@@ -62,16 +65,8 @@ document.getElementById('loginBtn').onclick = async () => {
     } catch(e) { alert(e.message); }
 };
 
-// التحقق من الجلسة
-async function checkSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if(session) { loginScreen.classList.add('hidden'); dashboardScreen.classList.remove('hidden'); userEmailSpan.innerText = session.user.email; await fetchCompany(); }
-    else { loginScreen.classList.remove('hidden'); dashboardScreen.classList.add('hidden'); }
-}
-
 document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); await checkSession(); };
 
-// المنتجات
 async function loadProducts() {
     const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     document.getElementById('productsTable').innerHTML = (data||[]).map(p => `<tr><td class="p-4 font-bold">${p.name}</td><td class="p-4 text-blue-400">${Number(p.selling_price).toFixed(2)}</td><td class="p-4">${p.current_stock || 0}</td></tr>`).join('');
@@ -83,7 +78,6 @@ async function addProduct() {
 function openModal() { document.getElementById('productModal').classList.replace('hidden','flex'); }
 function closeModal() { document.getElementById('productModal').classList.replace('flex','hidden'); }
 
-// العملاء
 async function loadCustomers() {
     const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
     document.getElementById('customersTable').innerHTML = (data||[]).map(c => `<tr><td class="p-4 font-bold">${c.name}</td><td class="p-4">${c.phone || '-'}</td><td class="p-4 font-bold ${c.balance>0?'text-green-400':'text-red-400'}">${Number(c.balance).toFixed(2)}</td></tr>`).join('');
@@ -95,7 +89,6 @@ async function addCustomer() {
 function openCustomerModal() { document.getElementById('customerModal').classList.replace('hidden','flex'); }
 function closeCustomerModal() { document.getElementById('customerModal').classList.replace('flex','hidden'); }
 
-// الفواتير
 async function loadInvoiceData() {
     const { data: c } = await supabase.from('customers').select('*'); allCustomers = c || [];
     document.getElementById('invoiceCustomer').innerHTML = '<option value="">اختر العميل</option>' + allCustomers.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
@@ -134,16 +127,19 @@ async function saveInvoice() {
     alert('✅ تم الحفظ!'); invoiceItems = []; renderInvoiceTable(); loadInvoiceData();
 }
 
-// طباعة فاتورة PDF
 function printLastInvoice() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text("Invoice", 10, 10);
-    doc.save("invoice.pdf");
-    alert('جاري تحميل الفاتورة');
+    const customer = document.getElementById('invoiceCustomer');
+    const customerName = customer.options[customer.selectedIndex]?.text || 'عميل نقدي';
+    doc.setFontSize(22); doc.text("Invoice / فاتورة", 105, 20, null, null, "center");
+    doc.setFontSize(12); doc.text("Customer: " + customerName, 10, 40); doc.text("Date: " + new Date().toLocaleDateString(), 10, 50);
+    let y = 70; doc.text("Item", 10, y); doc.text("Qty", 80, y); doc.text("Price", 110, y); doc.text("Total", 160, y);
+    doc.line(10, y+2, 200, y+2); y += 10;
+    invoiceItems.forEach(item => { doc.text(item.name, 10, y); doc.text(item.quantity.toString(), 80, y); doc.text(item.price.toFixed(2), 110, y); doc.text((item.price * item.quantity).toFixed(2), 160, y); y += 10; });
+    doc.text("Total: " + document.getElementById('invoiceTotal').innerText, 160, y + 10); doc.save("Invoice.pdf");
 }
 
-// الخزينة
 async function loadWallets() {
     const { data } = await supabase.from('wallets').select('*').eq('company_id', currentCompanyId);
     allWallets = data || [];
@@ -154,10 +150,8 @@ async function addTransaction() {
     const wid = document.getElementById('txWallet').value, type = document.getElementById('txType').value, amt = +document.getElementById('txAmount').value, desc = document.getElementById('txDesc').value;
     const target = document.getElementById('txTargetWallet').value;
     if(!wid || amt <= 0) return alert('أكمل البيانات!');
-    
     await supabase.from('transactions').insert([{ company_id: currentCompanyId, wallet_id: wid, type: type, amount: amt, description: desc }]);
     const w = allWallets.find(x => x.id === wid);
-    
     if(type === 'transfer') {
         await supabase.from('transactions').insert([{ company_id: currentCompanyId, wallet_id: target, type: 'transfer_in', amount: amt, description: 'تحويل من ' + w.name }]);
         const tw = allWallets.find(x => x.id === target);
@@ -170,34 +164,25 @@ async function addTransaction() {
     loadWallets(); document.getElementById('txAmount').value=''; document.getElementById('txDesc').value='';
 }
 
-// الموظفين
-async function addEmployee() {
-    await supabase.from('employees').insert([{ name: document.getElementById('empName').value, role: document.getElementById('empRole').value, company_id: currentCompanyId }]);
-    alert('تم الحفظ'); document.getElementById('empName').value='';
+async function loadReturnInvoices() {
+    const { data: inv } = await supabase.from('invoices').select('id, total_amount').eq('type', 'sale');
+    document.getElementById('returnInvoiceId').innerHTML = '<option value="">اختر الفاتورة</option>' + (inv||[]).map(i => `<option value="${i.id}">فاتورة رقم ${i.id.slice(0,8)} - ${i.total_amount} ج.م</option>`).join('');
+    const { data: prod } = await supabase.from('products').select('*');
+    document.getElementById('returnProductId').innerHTML = '<option value="">اختر الصنف</option>' + (prod||[]).map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+async function processReturn() {
+    const invId = document.getElementById('returnInvoiceId').value, prodId = document.getElementById('returnProductId').value, qty = +document.getElementById('returnQty').value;
+    if(!invId || !prodId || qty < 1) return alert('اختر الفاتورة والصنف والكمية!');
+    const { data: ret, error: errInv } = await supabase.from('invoices').insert([{ company_id: currentCompanyId, customer_id: null, type: 'sale_return', total_amount: 0, paid_amount: 0, status: 'paid' }]).select().single();
+    if(errInv) return alert(errInv.message);
+    const { error: errItem } = await supabase.from('invoice_items').insert([{ invoice_id: ret.id, product_id: prodId, quantity: qty, unit_price: 0, total: 0 }]);
+    if(errItem) return alert(errItem.message);
+    const { data: product } = await supabase.from('products').select('current_stock').eq('id', prodId).single();
+    await supabase.from('products').update({ current_stock: (+product.current_stock) + qty }).eq('id', prodId);
+    alert('✅ تم تسجيل المرتجع، والمخزون اتحدث!');
 }
 
-// التقارير
 async function loadReports() {
     const { data: inv } = await supabase.from('invoices').select('total_amount');
     document.getElementById('reportSales').innerText = (inv||[]).reduce((s, i) => s + Number(i.total_amount), 0).toFixed(2);
-    
-    const { data: prod } = await supabase.from('products').select('current_stock, selling_price');
-    document.getElementById('reportStock').innerText = (prod||[]).reduce((s, p) => s + (Number(p.current_stock) * Number(p.selling_price)), 0).toFixed(2);
-    
-    const { count } = await supabase.from('customers').select('*', { count: 'exact', head: true });
-    document.getElementById('reportCustomers').innerText = count || 0;
-}
-
-// تحويل نوع الحركة
-document.getElementById('txType').onchange = (e) => {
-    const tw = document.getElementById('txTargetWallet');
-    if(e.target.value === 'transfer') {
-        tw.classList.remove('hidden');
-        tw.innerHTML = allWallets.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
-    } else {
-        tw.classList.add('hidden');
-    }
-};
-
-// تشغيل الجلسة
-checkSession();
+    const { data: prod } = await
