@@ -53,7 +53,8 @@ document.getElementById('loginBtn').onclick = async () => {
             const { data: c, error: errC } = await supabase.from('companies').insert([{ name: cn }]).select().single(); if (errC) throw errC;
             await supabase.from('user_profiles').insert([{ id: a.user.id, company_id: c.id, role: 'admin' }]);
             await supabase.from('branches').insert([{ company_id: c.id, name: bn }]);
-            await supabase.from('wallets').insert([{ company_id: c.id, name: 'الخزينة النقدية', type: 'cash', balance: 0 }, { company_id: c.id, name: 'إنستاباي', type: 'bank', balance: 0 }]);
+            const { error } = await supabase.from('wallets').insert([{ company_id: currentCompanyId, name: name, type: type, balance: 0 }]);
+if (error) return alert(error.message);
         } else { const { error } = await supabase.auth.signInWithPassword({ email: em, password: pw }); if (error) throw error; }
         await checkSession();
     } catch(e) { alert(e.message); }
