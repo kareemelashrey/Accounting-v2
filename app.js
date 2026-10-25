@@ -71,7 +71,7 @@ async function addCustomer() { await supabase.from('customers').insert([{ name: 
 function openCustomerModal() { document.getElementById('customerModal').classList.replace('hidden','flex'); }
 function closeCustomerModal() { document.getElementById('customerModal').classList.replace('flex','hidden'); }
 
-// المبيعات (الدفع المتعدد)
+// المبيعات
 async function loadInvoiceData() {
     const { data: c } = await supabase.from('customers').select('*'); allCustomers = c || [];
     document.getElementById('invoiceCustomer').innerHTML = '<option value="">اختر العميل</option>' + allCustomers.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
@@ -147,7 +147,22 @@ async function saveSupplierPayment() {
 async function loadCheques() { const { data } = await supabase.from('cheques').select('*').order('created_at', { ascending: false }); document.getElementById('chequesTable').innerHTML = (data||[]).map(c => `<tr><td class="p-4">${c.type === 'incoming' ? 'وارد' : 'صادر'}</td><td class="p-4 font-bold">${Number(c.amount).toFixed(2)}</td><td class="p-4">${c.due_date || '-'}</td></tr>`).join(''); }
 async function saveCheque() { await supabase.from('cheques').insert([{ company_id: currentCompanyId, type: document.getElementById('chequeType').value, amount: +document.getElementById('chequeAmount').value, due_date: document.getElementById('chequeDate').value || null }]); loadCheques(); }
 
-async function loadWallets() { const { data } = await supabase.from('wallets').select('*').eq('company_id', currentCompanyId); allWallets = data || []; document.getElementById('txWallet').innerHTML = allWallets.map(w => `<option value="${w.id}">${w.name}</option>`).join(''); document.getElementById('walletBalances').innerHTML = allWallets.map(w => `<div class="flex justify-between p-3 bg-slate-900 rounded border border-slate-700"><span>${w.name}</span><span class="font-bold ${w.balance>0?'text-green-400':'text-slate-400'}">${Number(w.balance).toFixed(2)} ج.م</span></div>`).join(''); }
+async function loadWallets() { 
+    const { data } = await supabase.from('wallets').select('*').eq('company_id', currentCompanyId); 
+    allWallets = data || []; 
+    document.getElementById('txWallet').innerHTML = allWallets.map(w => `<option value="${w.id}">${w.name}</option>`).join(''); 
+    document.getElementById('walletBalances').innerHTML = allWallets.map(w => `<div class="flex justify-between p-3 bg-slate-900 rounded border border-slate-700"><span>${w.name}</span><span class="font-bold ${w.balance>0?'text-green-400':'text-slate-400'}">${Number(w.balance).toFixed(2)} ج.م</span></div>`).join(''); 
+}
+
+async function addNewWallet() {
+    const name = document.getElementById('newWalletName').value.trim();
+    const type = document.getElementById('newWalletType').value;
+    if(!name) return alert('اكتب اسم المحفظة!');
+    await supabase.from('wallets').insert([{ company_id: currentCompanyId, name: name, type: type, balance: 0 }]);
+    document.getElementById('newWalletName').value = '';
+    loadWallets();
+}
+
 async function addTransaction() {
     const wid = document.getElementById('txWallet').value, type = document.getElementById('txType').value, amt = +document.getElementById('txAmount').value, desc = document.getElementById('txDesc').value, target = document.getElementById('txTargetWallet').value;
     if(!wid || amt <= 0) return alert('أكمل البيانات!');
