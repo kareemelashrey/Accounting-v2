@@ -64,3 +64,99 @@
             </header>
 
             <div class="p-6">
+<!-- المخزون -->
+                <div id="page-inventory" class="page-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">+ إضافة صنف</button>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-900 text-slate-400 text-sm"><tr><th class="p-4">الصنف</th><th class="p-4">البيع</th><th class="p-4">الكمية</th></tr></thead>
+                            <tbody id="productsTable" class="divide-y divide-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- العملاء -->
+                <div id="page-customers" class="page-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="openCustomerModal()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">+ إضافة عميل</button>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-900 text-slate-400 text-sm"><tr><th class="p-4">العميل</th><th class="p-4">الهاتف</th><th class="p-4">الرصيد</th></tr></thead>
+                            <tbody id="customersTable" class="divide-y divide-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- المبيعات -->
+                <div id="page-sales" class="page-content">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <h3 class="text-xl font-bold mb-4">فاتورة بيع</h3>
+                        <select id="invoiceCustomer" class="w-full bg-slate-700 p-3 rounded mb-4"><option value="">اختر العميل</option></select>
+                        <div class="flex gap-2 mb-4">
+                            <select id="itemProduct" class="w-2/3 bg-slate-700 p-3 rounded"><option value="">اختر الصنف</option></select>
+                            <input type="number" id="itemQty" value="1" min="1" class="w-1/3 bg-slate-700 p-3 rounded">
+                        </div>
+                        <button onclick="addItemToInvoice()" class="w-full bg-green-600 py-2 rounded font-bold mb-4">+ إضافة للفاتورة</button>
+                        <table class="w-full text-right mb-4"><tbody id="invoiceItemsTable"></tbody></table>
+                        <div class="flex justify-between text-lg font-bold text-green-400 mb-4">الإجمالي: <span id="invoiceTotal">0.00</span></div>
+                        <select id="payMethod" class="w-full bg-slate-700 p-3 rounded mb-2"><option value="cash">كاش</option><option value="instapay">إنستاباي</option><option value="bank_transfer">تحويل بنكي</option></select>
+                        <input type="number" id="payAmount" placeholder="المبلغ المدفوع" class="w-full bg-slate-700 p-3 rounded mb-4">
+                        <button onclick="saveInvoice()" class="w-full bg-blue-600 py-3 rounded font-bold">حفظ الفاتورة</button>
+                    </div>
+                </div>
+
+                <!-- الخزينة المتقدمة -->
+                <div id="page-cash" class="page-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                            <h3 class="text-xl font-bold mb-4">إدارة الخزينة</h3>
+                            <select id="txWallet" class="w-full bg-slate-700 p-3 rounded mb-2"></select>
+                            <select id="txType" class="w-full bg-slate-700 p-3 rounded mb-2">
+                                <option value="deposit">إيداع / إيراد</option>
+                                <option value="withdraw">سحب / مصروف</option>
+                                <option value="transfer">تحويل لمحفظة أخرى</option>
+                                <option value="external_in">تزويد خارجي</option>
+                                <option value="external_out">سحب خارجي</option>
+                            </select>
+                            <select id="txTargetWallet" class="w-full bg-slate-700 p-3 rounded mb-2 hidden"></select>
+                            <input type="number" id="txAmount" placeholder="المبلغ" class="w-full bg-slate-700 p-3 rounded mb-4">
+                            <input type="text" id="txDesc" placeholder="البيان (وصف الحركة)" class="w-full bg-slate-700 p-3 rounded mb-4">
+                            <button onclick="addTransaction()" class="w-full bg-blue-600 py-2 rounded font-bold">تسجيل الحركة</button>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                            <h3 class="text-xl font-bold mb-4">أرصدة المحافظ</h3>
+                            <div id="walletBalances" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الموظفين -->
+                <div id="page-employees" class="page-content">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <h3 class="text-xl font-bold mb-4">إضافة موظف / شريك</h3>
+                        <input type="text" id="empName" placeholder="الاسم" class="w-full bg-slate-700 p-3 rounded mb-2">
+                        <input type="text" id="empRole" placeholder="الوظيفة (محاسب / شريك)" class="w-full bg-slate-700 p-3 rounded mb-4">
+                        <button onclick="addEmployee()" class="w-full bg-blue-600 py-2 rounded font-bold">حفظ</button>
+                    </div>
+                </div>
+
+                <!-- التقارير -->
+                <div id="page-reports" class="page-content">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                            <h3 class="text-slate-400 text-sm">إجمالي المبيعات</h3>
+                            <p id="reportSales" class="text-3xl font-bold text-green-400">0.00</p>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                            <h3 class="text-slate-400 text-sm">قيمة المخزون</h3>
+                            <p id="reportStock" class="text-3xl font-bold text-blue-400">0.00</p>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                            <h3 class="text-slate-400 text-sm">عدد العملاء</h3>
+                            <p id="reportCustomers" class="text-3xl font-bold text-yellow-400">0</p>
+                        </div>
+                    </div>
+                </div>
