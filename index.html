@@ -1,1 +1,289 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام المحاسبة الشامل</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .page-content { display: none; }
+        .page-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
 
+    <!-- شاشة الدخول -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl">
+            <h1 class="text-3xl font-bold text-center mb-2">مرحباً بعودتك</h1>
+            <div id="errorBox" class="hidden bg-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center mb-4 font-bold"></div>
+            <div class="space-y-4">
+                <input type="email" id="email" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3" placeholder="البريد الإلكتروني" dir="ltr">
+                <input type="password" id="password" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3" placeholder="كلمة المرور" dir="ltr">
+                <div id="companyFields" class="hidden space-y-3">
+                    <input type="text" id="companyName" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3" placeholder="اسم الشركة">
+                    <input type="text" id="branchName" class="w-full bg-slate-800/50 border border-slate-600 text-white rounded-xl px-4 py-3" placeholder="اسم الفرع الرئيسي">
+                </div>
+                <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition">دخول</button>
+                <button id="toggleRegisterBtn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition">تسجيل شركة جديدة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة التحكم -->
+    <div id="dashboardScreen" class="hidden min-h-screen bg-slate-900">
+        <aside class="w-64 bg-slate-800 border-l border-slate-700 flex flex-col hidden md:flex fixed h-full right-0 top-0">
+            <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900/50">
+                <span class="text-xl font-bold text-blue-500">نظامي المحاسبي</span>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <p class="px-4 text-xs font-bold text-slate-500 mb-2">العمليات</p>
+                <a href="#" onclick="showPage('home', this)" class="menu-item bg-slate-700 text-blue-400 border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الرئيسية</a>
+                <a href="#" onclick="showPage('inventory', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المخزون (الأصناف)</a>
+                <a href="#" onclick="showPage('customers', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">العملاء</a>
+                <a href="#" onclick="showPage('sales', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات (فواتير)</a>
+                <a href="#" onclick="showPage('cash', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الخزينة والمحافظ</a>
+            </nav>
+            <div class="p-4 border-t border-slate-700">
+                <button id="logoutBtn" class="w-full bg-red-500/10 text-red-400 hover:bg-red-500/20 py-2 rounded-lg font-bold transition-colors">تسجيل خروج</button>
+            </div>
+        </aside>
+
+        <main class="mr-0 md:mr-64 min-h-screen flex flex-col">
+            <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6">
+                <h2 id="pageTitle" class="text-lg font-bold text-white">لوحة التحكم</h2>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-slate-400">مرحباً، <span id="userEmail" class="text-blue-400 font-bold">...</span></span>
+                </div>
+            </header>
+
+            <div class="p-6">
+                <div id="page-home" class="page-content active">
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">مرحباً بك في النظام الشامل.</div>
+                </div>
+                <div id="page-inventory" class="page-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">+ إضافة صنف</button>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-900 text-slate-400 text-sm"><tr><th class="p-4">الصنف</th><th class="p-4">البيع</th><th class="p-4">الكمية</th></tr></thead>
+                            <tbody id="productsTable" class="divide-y divide-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="page-customers" class="page-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="openCustomerModal()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">+ إضافة عميل</button>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-900 text-slate-400 text-sm"><tr><th class="p-4">العميل</th><th class="p-4">الهاتف</th><th class="p-4">الرصيد</th></tr></thead>
+                            <tbody id="customersTable" class="divide-y divide-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="page-sales" class="page-content">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <h3 class="text-xl font-bold mb-4">فاتورة بيع</h3>
+                        <select id="invoiceCustomer" class="w-full bg-slate-700 p-3 rounded mb-4"><option value="">اختر العميل</option></select>
+                        <div class="flex gap-2 mb-4">
+                            <select id="itemProduct" class="w-2/3 bg-slate-700 p-3 rounded"><option value="">اختر الصنف</option></select>
+                            <input type="number" id="itemQty" value="1" min="1" class="w-1/3 bg-slate-700 p-3 rounded">
+                        </div>
+                        <button onclick="addItemToInvoice()" class="w-full bg-green-600 py-2 rounded font-bold mb-4">+ إضافة للفاتورة</button>
+                        <table class="w-full text-right mb-4"><tbody id="invoiceItemsTable"></tbody></table>
+                        <div class="flex justify-between text-lg font-bold text-green-400 mb-4">الإجمالي: <span id="invoiceTotal">0.00</span></div>
+                        <select id="payMethod" class="w-full bg-slate-700 p-3 rounded mb-2"><option value="cash">كاش</option><option value="instapay">إنستاباي</option><option value="bank_transfer">تحويل بنكي</option></select>
+                        <input type="number" id="payAmount" placeholder="المبلغ المدفوع" class="w-full bg-slate-700 p-3 rounded mb-4">
+                        <button onclick="saveInvoice()" class="w-full bg-blue-600 py-3 rounded font-bold">حفظ الفاتورة</button>
+                    </div>
+                </div>
+                <div id="page-cash" class="page-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                            <h3 class="text-xl font-bold mb-4">إضافة حركة</h3>
+                            <select id="txWallet" class="w-full bg-slate-700 p-3 rounded mb-2"></select>
+                            <select id="txType" class="w-full bg-slate-700 p-3 rounded mb-2"><option value="deposit">إيداع / إيراد</option><option value="withdraw">سحب / مصروف</option></select>
+                            <input type="number" id="txAmount" placeholder="المبلغ" class="w-full bg-slate-700 p-3 rounded mb-4">
+                            <input type="text" id="txDesc" placeholder="البيان (وصف الحركة)" class="w-full bg-slate-700 p-3 rounded mb-4">
+                            <button onclick="addTransaction()" class="w-full bg-blue-600 py-2 rounded font-bold">تسجيل الحركة</button>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                            <h3 class="text-xl font-bold mb-4">أرصدة المحافظ</h3>
+                            <div id="walletBalances" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="productModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+        <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md">
+            <input type="text" id="pName" placeholder="اسم الصنف" class="w-full bg-slate-700 p-3 rounded mb-2">
+            <div class="flex gap-2 mb-2"><input type="number" id="pBuy" placeholder="سعر الشراء" class="w-1/2 bg-slate-700 p-3 rounded"><input type="number" id="pSell" placeholder="سعر البيع" class="w-1/2 bg-slate-700 p-3 rounded"></div>
+            <input type="number" id="pStock" placeholder="الكمية" class="w-full bg-slate-700 p-3 rounded mb-4">
+            <div class="flex gap-2"><button onclick="addProduct()" class="bg-blue-600 flex-1 py-2 rounded">حفظ</button><button onclick="closeModal()" class="bg-slate-600 flex-1 py-2 rounded">إلغاء</button></div>
+        </div>
+    </div>
+    <div id="customerModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+        <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md">
+            <input type="text" id="cName" placeholder="اسم العميل" class="w-full bg-slate-700 p-3 rounded mb-2">
+            <input type="text" id="cPhone" placeholder="الهاتف" class="w-full bg-slate-700 p-3 rounded mb-4">
+            <div class="flex gap-2"><button onclick="addCustomer()" class="bg-blue-600 flex-1 py-2 rounded">حفظ</button><button onclick="closeCustomerModal()" class="bg-slate-600 flex-1 py-2 rounded">إلغاء</button></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wjdhikxuwootmsnztmgb.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_6JNfXXpQLxlxSdyF4XWKng_ZYaNccSE';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let currentCompanyId = null, invoiceItems = [], allProducts = [], allCustomers = [], allWallets = [];
+        let isRegisterMode = false;
+
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboardScreen = document.getElementById('dashboardScreen');
+        const userEmailSpan = document.getElementById('userEmail');
+
+        document.getElementById('toggleRegisterBtn').onclick = () => {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('companyFields').classList.toggle('hidden');
+            document.getElementById('loginBtn').innerText = isRegisterMode ? 'إنشاء شركة ودخول' : 'دخول';
+        };
+
+        function showPage(pageId, element) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('bg-slate-700','text-blue-400','border-r-4','border-blue-500'));
+            if(element) element.classList.add('bg-slate-700','text-blue-400','border-r-4','border-blue-500');
+            document.getElementById('pageTitle').innerText = { 'home': 'الرئيسية', 'inventory': 'المخزون', 'customers': 'العملاء', 'sales': 'المبيعات', 'cash': 'الخزينة' }[pageId];
+            
+            if(pageId === 'inventory') loadProducts();
+            if(pageId === 'customers') loadCustomers();
+            if(pageId === 'sales') loadInvoiceData();
+            if(pageId === 'cash') loadWallets();
+        }
+
+        async function fetchCompany() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if(user) {
+                const { data } = await supabase.from('user_profiles').select('company_id').eq('id', user.id).single();
+                if(data) currentCompanyId = data.company_id;
+            }
+        }
+
+        async function loadProducts() {
+            const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+            document.getElementById('productsTable').innerHTML = (data||[]).map(p => `<tr><td class="p-4 font-bold">${p.name}</td><td class="p-4 text-blue-400">${Number(p.selling_price).toFixed(2)}</td><td class="p-4">${p.current_stock || 0}</td></tr>`).join('');
+        }
+        async function addProduct() {
+            await supabase.from('products').insert([{ name: document.getElementById('pName').value, cost_price: +document.getElementById('pBuy').value, selling_price: +document.getElementById('pSell').value, current_stock: +document.getElementById('pStock').value, company_id: currentCompanyId }]);
+            closeModal(); loadProducts();
+        }
+        function openModal() { document.getElementById('productModal').classList.replace('hidden','flex'); }
+        function closeModal() { document.getElementById('productModal').classList.replace('flex','hidden'); }
+
+        async function loadCustomers() {
+            const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
+            document.getElementById('customersTable').innerHTML = (data||[]).map(c => `<tr><td class="p-4 font-bold">${c.name}</td><td class="p-4">${c.phone || '-'}</td><td class="p-4 font-bold ${c.balance>0?'text-green-400':'text-red-400'}">${Number(c.balance).toFixed(2)}</td></tr>`).join('');
+        }
+        async function addCustomer() {
+            await supabase.from('customers').insert([{ name: document.getElementById('cName').value, phone: document.getElementById('cPhone').value, balance: 0, company_id: currentCompanyId }]);
+            closeCustomerModal(); loadCustomers();
+        }
+        function openCustomerModal() { document.getElementById('customerModal').classList.replace('hidden','flex'); }
+        function closeCustomerModal() { document.getElementById('customerModal').classList.replace('flex','hidden'); }
+
+        async function loadInvoiceData() {
+            const { data: c } = await supabase.from('customers').select('*'); allCustomers = c || [];
+            document.getElementById('invoiceCustomer').innerHTML = '<option value="">اختر العميل</option>' + allCustomers.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
+            const { data: p } = await supabase.from('products').select('*'); allProducts = p || [];
+            document.getElementById('itemProduct').innerHTML = '<option value="">اختر الصنف</option>' + allProducts.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
+        }
+        function addItemToInvoice() {
+            const pid = document.getElementById('itemProduct').value, qty = +document.getElementById('itemQty').value;
+            if(!pid || qty<1) return;
+            const prod = allProducts.find(p => p.id === pid);
+            const ex = invoiceItems.find(i => i.product_id === pid);
+            if(ex) ex.quantity += qty; else invoiceItems.push({ product_id: pid, name: prod.name, price: +prod.selling_price, quantity: qty });
+            renderInvoiceTable();
+        }
+        function renderInvoiceTable() {
+            let total = 0;
+            document.getElementById('invoiceItemsTable').innerHTML = invoiceItems.map((item, i) => {
+                total += item.price * item.quantity;
+                return `<tr><td class="p-2">${item.name}</td><td class="p-2">${item.quantity}</td><td class="p-2">${(item.price*item.quantity).toFixed(2)}</td><td class="p-2 text-red-400" onclick="invoiceItems.splice(${i},1);renderInvoiceTable()">حذف</td></tr>`;
+            }).join('');
+            document.getElementById('invoiceTotal').innerText = total.toFixed(2);
+        }
+        async function saveInvoice() {
+            const cid = document.getElementById('invoiceCustomer').value, method = document.getElementById('payMethod').value, amt = +document.getElementById('payAmount').value || 0;
+            if(!cid || !invoiceItems.length) return alert('اختر عميل وأصناف!');
+            const total = invoiceItems.reduce((s, i) => s + (i.price*i.quantity), 0);
+            const { data: inv, error: errInv } = await supabase.from('invoices').insert([{ company_id: currentCompanyId, customer_id: cid, type: 'sale', total_amount: total, paid_amount: amt, status: amt>=total?'paid':'partial' }]).select().single();
+            if (errInv) return alert(errInv.message);
+            const { error: errItems } = await supabase.from('invoice_items').insert(invoiceItems.map(i => ({ invoice_id: inv.id, product_id: i.product_id, quantity: i.quantity, unit_price: i.price, total: i.price*i.quantity })));
+            if (errItems) return alert(errItems.message);
+            if(amt > 0) await supabase.from('payments').insert([{ company_id: currentCompanyId, invoice_id: inv.id, amount: amt, payment_method: method }]);
+            for(let item of invoiceItems) {
+                const p = allProducts.find(x => x.id === item.product_id);
+                await supabase.from('products').update({ current_stock: (+p.current_stock) - item.quantity }).eq('id', item.product_id);
+            }
+            alert('✅ تم الحفظ!'); invoiceItems = []; renderInvoiceTable(); loadInvoiceData();
+        }
+
+        async function loadWallets() {
+            const { data } = await supabase.from('wallets').select('*').eq('company_id', currentCompanyId);
+            allWallets = data || [];
+            document.getElementById('txWallet').innerHTML = allWallets.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+            document.getElementById('walletBalances').innerHTML = allWallets.map(w => `<div class="flex justify-between p-3 bg-slate-900 rounded border border-slate-700"><span>${w.name}</span><span class="font-bold ${w.balance>0?'text-green-400':'text-slate-400'}">${Number(w.balance).toFixed(2)} ج.م</span></div>`).join('');
+        }
+        async function addTransaction() {
+            const wid = document.getElementById('txWallet').value, type = document.getElementById('txType').value, amt = +document.getElementById('txAmount').value, desc = document.getElementById('txDesc').value;
+            if(!wid || amt <= 0) return alert('أكمل البيانات!');
+            const { error } = await supabase.from('transactions').insert([{ company_id: currentCompanyId, wallet_id: wid, type: type, amount: amt, description: desc }]);
+            if (error) return alert(error.message);
+            const w = allWallets.find(x => x.id === wid);
+            const newBal = type === 'deposit' ? (+w.balance + amt) : (+w.balance - amt);
+            await supabase.from('wallets').update({ balance: newBal }).eq('id', wid);
+            loadWallets(); document.getElementById('txAmount').value=''; document.getElementById('txDesc').value='';
+        }
+
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if(session) { loginScreen.classList.add('hidden'); dashboardScreen.classList.remove('hidden'); userEmailSpan.innerText = session.user.email; await fetchCompany(); }
+            else { loginScreen.classList.remove('hidden'); dashboardScreen.classList.add('hidden'); }
+        }
+
+        document.getElementById('loginBtn').onclick = async () => {
+            const em = document.getElementById('email').value, pw = document.getElementById('password').value;
+            if(!em || !pw) return;
+            try {
+                if(isRegisterMode) {
+                    const cn = document.getElementById('companyName').value, bn = document.getElementById('branchName').value;
+                    const { data: a, error: errA } = await supabase.auth.signUp({ email: em, password: pw });
+                    if (errA) throw errA;
+                    const { data: c, error: errC } = await supabase.from('companies').insert([{ name: cn }]).select().single();
+                    if (errC) throw errC;
+                    await supabase.from('user_profiles').insert([{ id: a.user.id, company_id: c.id, role: 'admin' }]);
+                    await supabase.from('branches').insert([{ company_id: c.id, name: bn }]);
+                    await supabase.from('wallets').insert([{ company_id: c.id, name: 'الخزينة النقدية', type: 'cash', balance: 0 }, { company_id: c.id, name: 'إنستاباي', type: 'bank', balance: 0 }]);
+                } else {
+                    const { error } = await supabase.auth.signInWithPassword({ email: em, password: pw });
+                    if (error) throw error;
+                }
+                await checkSession();
+            } catch(e) { alert(e.message); }
+        };
+
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); await checkSession(); };
+        checkSession();
+    </script>
+</body>
+</html>
