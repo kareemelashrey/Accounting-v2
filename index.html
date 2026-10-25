@@ -62,16 +62,12 @@
             </header>
 
             <div class="p-6">
-                <!-- الرئيسية -->
                 <div id="page-home" class="page-content active">
                     <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">مرحباً بك في النظام الشامل.</div>
                 </div>
-
-                <!-- المخزون -->
                 <div id="page-inventory" class="page-content">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                    <div class="flex justify-between items-center mb-4">
                         <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">+ إضافة صنف</button>
-                        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="ابحث..." class="bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
                     </div>
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto">
                         <table class="w-full text-right">
@@ -80,12 +76,9 @@
                         </table>
                     </div>
                 </div>
-
-                <!-- العملاء -->
                 <div id="page-customers" class="page-content">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                    <div class="flex justify-between items-center mb-4">
                         <button onclick="openCustomerModal()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">+ إضافة عميل</button>
-                        <input type="text" id="searchCustomer" onkeyup="filterCustomerTable()" placeholder="ابحث..." class="bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
                     </div>
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto">
                         <table class="w-full text-right">
@@ -94,8 +87,6 @@
                         </table>
                     </div>
                 </div>
-
-                <!-- المبيعات -->
                 <div id="page-sales" class="page-content">
                     <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
                         <h3 class="text-xl font-bold mb-4">فاتورة بيع</h3>
@@ -112,8 +103,6 @@
                         <button onclick="saveInvoice()" class="w-full bg-blue-600 py-3 rounded font-bold">حفظ الفاتورة</button>
                     </div>
                 </div>
-
-                <!-- الخزينة -->
                 <div id="page-cash" class="page-content">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
@@ -134,7 +123,7 @@
         </main>
     </div>
 
-    <!-- Modals (إضافة صنف / عميل) -->
+    <!-- Modals -->
     <div id="productModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
         <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md">
             <input type="text" id="pName" placeholder="اسم الصنف" class="w-full bg-slate-700 p-3 rounded mb-2">
@@ -174,7 +163,6 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('bg-slate-700','text-blue-400','border-r-4','border-blue-500'));
             if(element) element.classList.add('bg-slate-700','text-blue-400','border-r-4','border-blue-500');
             document.getElementById('pageTitle').innerText = { 'home': 'الرئيسية', 'inventory': 'المخزون', 'customers': 'العملاء', 'sales': 'المبيعات', 'cash': 'الخزينة' }[pageId];
-            
             if(pageId === 'inventory') loadProducts();
             if(pageId === 'customers') loadCustomers();
             if(pageId === 'sales') loadInvoiceData();
@@ -189,7 +177,6 @@
             }
         }
 
-        // الأصناف
         async function loadProducts() {
             const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
             document.getElementById('productsTable').innerHTML = (data||[]).map(p => `<tr><td class="p-4 font-bold">${p.name}</td><td class="p-4 text-blue-400">${Number(p.selling_price).toFixed(2)}</td><td class="p-4">${p.current_stock || 0}</td></tr>`).join('');
@@ -200,9 +187,7 @@
         }
         function openModal() { document.getElementById('productModal').classList.replace('hidden','flex'); }
         function closeModal() { document.getElementById('productModal').classList.replace('flex','hidden'); }
-        function filterTable() { const i = document.getElementById('searchInput').value.toLowerCase(); document.querySelectorAll('#productsTable tr').forEach(r => r.style.display = r.innerText.toLowerCase().includes(i)?'':'none'); }
 
-        // العملاء
         async function loadCustomers() {
             const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
             document.getElementById('customersTable').innerHTML = (data||[]).map(c => `<tr><td class="p-4 font-bold">${c.name}</td><td class="p-4">${c.phone || '-'}</td><td class="p-4 font-bold ${c.balance>0?'text-green-400':'text-red-400'}">${Number(c.balance).toFixed(2)}</td></tr>`).join('');
@@ -213,9 +198,7 @@
         }
         function openCustomerModal() { document.getElementById('customerModal').classList.replace('hidden','flex'); }
         function closeCustomerModal() { document.getElementById('customerModal').classList.replace('flex','hidden'); }
-        function filterCustomerTable() { const i = document.getElementById('searchCustomer').value.toLowerCase(); document.querySelectorAll('#customersTable tr').forEach(r => r.style.display = r.innerText.toLowerCase().includes(i)?'':'none'); }
 
-        // المبيعات
         async function loadInvoiceData() {
             const { data: c } = await supabase.from('customers').select('*'); allCustomers = c || [];
             document.getElementById('invoiceCustomer').innerHTML = '<option value="">اختر العميل</option>' + allCustomers.map(x => `<option value="${x.id}">${x.name}</option>`).join('');
@@ -242,9 +225,14 @@
             const cid = document.getElementById('invoiceCustomer').value, method = document.getElementById('payMethod').value, amt = +document.getElementById('payAmount').value || 0;
             if(!cid || !invoiceItems.length) return alert('اختر عميل وأصناف!');
             const total = invoiceItems.reduce((s, i) => s + (i.price*i.quantity), 0);
-            const { data: inv } ={ await sup companyabase.from('invoices_id').insert([{ company:_id: currentCompanyId, current customer_id: cid, type: 'sale', total_amount: total, paid_amount: amt, status: amt>=total?'paid':'partial' }]).select().single();
-            await supabase.from('invoice_items').insert(invoiceItems.map(i => ({ invoice_id: inv.id, product_id: i.product_id, quantity: i.quantity, unit_price: i.price, total: i.price*i.quantity })));
-            if(amt > 0) await supabase.from('payments').insert([CompanyId, invoice_id: inv.id, amount: amt, payment_method: method }]);
+            const { data: inv, error: errInv } = await supabase.from('invoices').insert([{ company_id: currentCompanyId, customer_id: cid, type: 'sale', total_amount: total, paid_amount: amt, status: amt>=total?'paid':'partial' }]).select().single();
+            if (errInv) return alert(errInv.message);
+            const { error: errItems } = await supabase.from('invoice_items').insert(invoiceItems.map(i => ({ invoice_id: inv.id, product_id: i.product_id, quantity: i.quantity, unit_price: i.price, total: i.price*i.quantity })));
+            if (errItems) return alert(errItems.message);
+            if(amt > 0) {
+                const { error: errPay } = await supabase.from('payments').insert([{ company_id: currentCompanyId, invoice_id: inv.id, amount: amt, payment_method: method }]);
+                if (errPay) return alert(errPay.message);
+            }
             for(let item of invoiceItems) {
                 const p = allProducts.find(x => x.id === item.product_id);
                 await supabase.from('products').update({ current_stock: (+p.current_stock) - item.quantity }).eq('id', item.product_id);
@@ -252,7 +240,6 @@
             alert('✅ تم الحفظ!'); invoiceItems = []; renderInvoiceTable(); loadInvoiceData();
         }
 
-        // الخزينة
         async function loadWallets() {
             const { data } = await supabase.from('wallets').select('*').eq('company_id', currentCompanyId);
             allWallets = data || [];
@@ -262,7 +249,8 @@
         async function addTransaction() {
             const wid = document.getElementById('txWallet').value, type = document.getElementById('txType').value, amt = +document.getElementById('txAmount').value, desc = document.getElementById('txDesc').value;
             if(!wid || amt <= 0) return alert('أكمل البيانات!');
-            await supabase.from('transactions').insert([{ company_id: currentCompanyId, wallet_id: wid, type: type, amount: amt, description: desc }]);
+            const { error } = await supabase.from('transactions').insert([{ company_id: currentCompanyId, wallet_id: wid, type: type, amount: amt, description: desc }]);
+            if (error) return alert(error.message);
             const w = allWallets.find(x => x.id === wid);
             const newBal = type === 'deposit' ? (+w.balance + amt) : (+w.balance - amt);
             await supabase.from('wallets').update({ balance: newBal }).eq('id', wid);
@@ -281,14 +269,16 @@
             try {
                 if(isRegisterMode) {
                     const cn = document.getElementById('companyName').value, bn = document.getElementById('branchName').value;
-                    const { data: a } = await supabase.auth.signUp({ email: em, password: pw });
-                    const { data: c } = await supabase.from('companies').insert([{ name: cn }]).select().single();
+                    const { data: a, error: errA } = await supabase.auth.signUp({ email: em, password: pw });
+                    if (errA) throw errA;
+                    const { data: c, error: errC } = await supabase.from('companies').insert([{ name: cn }]).select().single();
+                    if (errC) throw errC;
                     await supabase.from('user_profiles').insert([{ id: a.user.id, company_id: c.id, role: 'admin' }]);
                     await supabase.from('branches').insert([{ company_id: c.id, name: bn }]);
-                    // إنشاء محافظ افتراضية للشركة الجديدة
                     await supabase.from('wallets').insert([{ company_id: c.id, name: 'الخزينة النقدية', type: 'cash', balance: 0 }, { company_id: c.id, name: 'إنستاباي', type: 'bank', balance: 0 }]);
                 } else {
-                    await supabase.auth.signInWithPassword({ email: em, password: pw });
+                    const { error } = await supabase.auth.signInWithPassword({ email: em, password: pw });
+                    if (error) throw error;
                 }
                 await checkSession();
             } catch(e) { alert(e.message); }
