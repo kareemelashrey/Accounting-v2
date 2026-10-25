@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام المحاسبة | العملاء</title>
+    <title>نظام المحاسبة | الفواتير</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -16,7 +16,7 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
 
-    <!-- 1. شاشة الدخول -->
+    <!-- شاشة الدخول -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
         <div class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl">
             <h1 class="text-3xl font-bold text-center mb-8">مرحباً بعودتك</h1>
@@ -29,9 +29,8 @@
         </div>
     </div>
 
-    <!-- 2. لوحة التحكم -->
+    <!-- لوحة التحكم -->
     <div id="dashboardScreen" class="hidden min-h-screen bg-slate-900">
-        <!-- القائمة الجانبية -->
         <aside class="w-64 bg-slate-800 border-l border-slate-700 flex flex-col hidden md:flex fixed h-full right-0 top-0">
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900/50">
                 <span class="text-xl font-bold text-blue-500">نظامي المحاسبي</span>
@@ -41,8 +40,7 @@
                 <a href="#" onclick="showPage('home', this)" class="menu-item bg-slate-700 text-blue-400 border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الرئيسية</a>
                 <a href="#" onclick="showPage('inventory', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المخزون (الأصناف)</a>
                 <a href="#" onclick="showPage('customers', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">العملاء</a>
-                <a href="#" onclick="showPage('sales', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات</a>
-                <a href="#" onclick="showPage('invoices', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الفواتير</a>
+                <a href="#" onclick="showPage('sales', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات (فواتير)</a>
                 <a href="#" onclick="showPage('cash', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الخزينة</a>
             </nav>
             <div class="p-4 border-t border-slate-700">
@@ -50,7 +48,6 @@
             </div>
         </aside>
 
-        <!-- المحتوى الرئيسي -->
         <main class="mr-0 md:mr-64 min-h-screen flex flex-col">
             <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6">
                 <h2 id="pageTitle" class="text-lg font-bold text-white">لوحة التحكم</h2>
@@ -60,91 +57,89 @@
             </header>
 
             <div class="p-6">
-                <!-- صفحة الرئيسية -->
+                <!-- الرئيسية -->
                 <div id="page-home" class="page-content active">
-                    <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">
-                        مرحباً بك في نظامك المحاسبي. اختر من القائمة الجانبية.
-                    </div>
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">مرحباً بك في النظام.</div>
                 </div>
 
-                <!-- صفحة المخزون -->
+                <!-- المخزون -->
                 <div id="page-inventory" class="page-content">
                     <div class="bg-slate-800 rounded-xl p-8 text-center text-slate-400">شاشة المخزون (تم تجهيزها سابقاً)</div>
                 </div>
 
-                <!-- صفحة العملاء (الشغل الجديد) -->
+                <!-- العملاء -->
                 <div id="page-customers" class="page-content">
-                    <!-- كروت الإحصائيات -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                            <p class="text-slate-400 text-sm font-bold mb-2">إجمالي عدد العملاء</p>
-                            <h3 id="totalCustomers" class="text-3xl font-bold text-white">0</h3>
-                        </div>
-                        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                            <p class="text-slate-400 text-sm font-bold mb-2">إجمالي أرصدة العملاء</p>
-                            <h3 id="totalBalance" class="text-3xl font-bold text-green-400">0.00 ج.م</h3>
-                        </div>
-                    </div>
+                    <div class="bg-slate-800 rounded-xl p-8 text-center text-slate-400">شاشة العملاء (تم تجهيزها سابقاً)</div>
+                </div>
 
-                    <!-- زرار الإضافة والبحث -->
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
-                        <button onclick="openCustomerModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold transition w-full md:w-auto">
-                            + إضافة عميل جديد
-                        </button>
-                        <input type="text" id="searchCustomer" onkeyup="filterCustomerTable()" placeholder="ابحث باسم العميل..." class="bg-slate-800 border border-slate-600 text-white rounded-lg px-4 py-2 w-full md:w-64">
-                    </div>
-
-                    <!-- الجدول -->
-                    <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-right">
-                                <thead class="bg-slate-900 text-slate-400 text-sm">
-                                    <tr>
-                                        <th class="p-4">اسم العميل</th>
-                                        <th class="p-4">رقم الهاتف</th>
-                                        <th class="p-4">الرصيد الحالي</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="customersTable" class="divide-y divide-slate-700">
-                                    <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
-                                </tbody>
-                            </table>
+                <!-- المبيعات (فواتير) -->
+                <div id="page-sales" class="page-content">
+                    <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                        <h3 class="text-xl font-bold mb-4">إصدار فاتورة بيع جديدة</h3>
+                        <div id="invoiceError" class="hidden bg-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center mb-4 font-bold"></div>
+                        
+                        <!-- اختيار العميل -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold mb-2">العميل</label>
+                            <select id="invoiceCustomer" class="w-full bg-slate-700 p-3 rounded border border-slate-600">
+                                <option value="">-- اختر العميل --</option>
+                            </select>
                         </div>
+
+                        <!-- إضافة الأصناف -->
+                        <div class="mb-4 bg-slate-900 p-4 rounded border border-slate-700">
+                            <label class="block text-sm font-bold mb-2">الأصناف</label>
+                            <div class="flex gap-2 mb-2">
+                                <select id="itemProduct" class="w-2/3 bg-slate-700 p-2 rounded border border-slate-600">
+                                    <option value="">-- اختر الصنف --</option>
+                                </select>
+                                <input type="number" id="itemQty" placeholder="الكمية" value="1" min="1" class="w-1/3 bg-slate-700 p-2 rounded border border-slate-600">
+                            </div>
+                            <button onclick="addItemToInvoice()" class="w-full bg-green-600 hover:bg-green-500 py-2 rounded font-bold text-sm">+ إضافة صنف للفاتورة</button>
+                        </div>
+
+                        <!-- جدول الفاتورة -->
+                        <table class="w-full text-right mb-4">
+                            <thead class="bg-slate-900 text-slate-400 text-sm">
+                                <tr>
+                                    <th class="p-2">الصنف</th>
+                                    <th class="p-2">الكمية</th>
+                                    <th class="p-2">السعر</th>
+                                    <th class="p-2">الإجمالي</th>
+                                    <th class="p-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoiceItemsTable">
+                                <tr><td colspan="5" class="text-center text-slate-500 p-4">لم تتم إضافة أصناف بعد.</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- الإجمالي والدفع -->
+                        <div class="flex justify-between items-center bg-slate-900 p-4 rounded border border-slate-700 mb-4">
+                            <span class="text-lg font-bold">الإجمالي:</span>
+                            <span id="invoiceTotal" class="text-2xl font-bold text-green-400">0.00 ج.م</span>
+                        </div>
+
+                        <input type="number" id="invoicePaid" placeholder="المبلغ المدفوع" class="w-full bg-slate-700 p-3 rounded border border-slate-600 mb-4" dir="ltr">
+
+                        <button onclick="saveInvoice()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded font-bold text-lg">حفظ الفاتورة</button>
                     </div>
                 </div>
 
-                <!-- باقي الصفحات -->
-                <div id="page-sales" class="page-content"><div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة المبيعات (قريباً)</div></div>
-                <div id="page-invoices" class="page-content"><div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة الفواتير (قريباً)</div></div>
+                <!-- الخزينة -->
                 <div id="page-cash" class="page-content"><div class="bg-slate-800 p-8 rounded-xl text-center text-slate-400">شاشة الخزينة (قريباً)</div></div>
             </div>
         </main>
     </div>
 
-    <!-- نافذة إضافة عميل (Modal) -->
-    <div id="customerModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
-        <div class="bg-slate-800 rounded-xl p-6 w-full max-w-md border border-slate-700">
-            <h3 class="text-xl font-bold mb-4">إضافة عميل جديد</h3>
-            <div id="customerModalError" class="hidden text-red-400 text-sm mb-2"></div>
-            <div class="space-y-4">
-                <input type="text" id="cName" placeholder="اسم العميل" class="w-full bg-slate-700 p-3 rounded border border-slate-600">
-                <input type="text" id="cPhone" placeholder="رقم الهاتف" class="w-full bg-slate-700 p-3 rounded border border-slate-600" dir="ltr">
-                <input type="number" id="cBalance" placeholder="الرصيد الافتتاحي (اختياري)" class="w-full bg-slate-700 p-3 rounded border border-slate-600" dir="ltr">
-            </div>
-            <div class="flex gap-2 mt-6">
-                <button onclick="addCustomer()" class="bg-blue-600 hover:bg-blue-500 flex-1 py-2 rounded font-bold">حفظ</button>
-                <button onclick="closeCustomerModal()" class="bg-slate-600 hover:bg-slate-500 flex-1 py-2 rounded font-bold">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // المفاتيح
         const SUPABASE_URL = 'https://wjdhikxuwootmsnztmgb.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_6JNfXXpQLxlxSdyF4XWKng_ZYaNccSE';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentCompanyId = null;
+        let invoiceItems = [];
+        let allProducts = [];
 
         // عناصر
         const loginScreen = document.getElementById('loginScreen');
@@ -155,7 +150,6 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const userEmailSpan = document.getElementById('userEmail');
         const errorBox = document.getElementById('errorBox');
-        const customersTable = document.getElementById('customersTable');
 
         // التنقل
         function showPage(pageId, element) {
@@ -171,97 +165,144 @@
                 element.classList.add('bg-slate-700', 'text-blue-400', 'border-r-4', 'border-blue-500');
             }
 
-            const titles = { 'home': 'لوحة التحكم', 'inventory': 'المخزون', 'customers': 'العملاء', 'sales': 'المبيعات', 'invoices': 'الفواتير', 'cash': 'الخزينة' };
+            const titles = { 'home': 'لوحة التحكم', 'inventory': 'المخزون', 'customers': 'العملاء', 'sales': 'المبيعات', 'cash': 'الخزينة' };
             document.getElementById('pageTitle').innerText = titles[pageId];
 
-            if(pageId === 'customers') loadCustomers();
+            if(pageId === 'sales') loadInvoiceData();
         }
 
-        // جلب الشركة الافتراضية أول ما المستخدم يدخل
         async function fetchCompany() {
-            const { data, error } = await supabase.from('companies').select('id').limit(1).single();
+            const { data } = await supabase.from('companies').select('id').limit(1).single();
             if (data) currentCompanyId = data.id;
         }
 
-        // جلب العملاء
-        async function loadCustomers() {
-            customersTable.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>';
-            
-            const { data, error } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
-            
-            if (error) {
-                customersTable.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-500">خطأ: ${error.message}</td></tr>`;
-                return;
-            }
+        // جلب البيانات لشاشة الفاتورة
+        async function loadInvoiceData() {
+            // جلب العملاء
+            const { data: customers } = await supabase.from('customers').select('*');
+            const custSelect = document.getElementById('invoiceCustomer');
+            custSelect.innerHTML = '<option value="">-- اختر العميل --</option>' + 
+                (customers || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
 
-            if (data.length === 0) {
-                customersTable.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا يوجد عملاء. اضغط على "إضافة عميل جديد".</td></tr>';
-                document.getElementById('totalCustomers').innerText = '0';
-                document.getElementById('totalBalance').innerText = '0.00 ج.م';
-                return;
-            }
-
-            document.getElementById('totalCustomers').innerText = data.length;
-            let totalBalance = 0;
-            data.forEach(c => { totalBalance += Number(c.balance || 0); });
-            document.getElementById('totalBalance').innerText = totalBalance.toFixed(2) + ' ج.م';
-
-            customersTable.innerHTML = data.map(c => `
-                <tr class="hover:bg-slate-700/50 transition">
-                    <td class="p-4 font-bold">${c.name}</td>
-                    <td class="p-4 text-slate-400" dir="ltr">${c.phone || '-'}</td>
-                    <td class="p-4 font-bold ${c.balance > 0 ? 'text-green-400' : (c.balance < 0 ? 'text-red-400' : 'text-slate-400')}">${Number(c.balance || 0).toFixed(2)} ج.م</td>
-                </tr>
-            `).join('');
+            // جلب الأصناف
+            const { data: products } = await supabase.from('products').select('*');
+            allProducts = products || [];
+            const prodSelect = document.getElementById('itemProduct');
+            prodSelect.innerHTML = '<option value="">-- اختر الصنف --</option>' + 
+                allProducts.map(p => `<option value="${p.id}">${p.name} (${p.current_stock || 0})</option>`).join('');
         }
 
-        // إضافة عميل
-        async function addCustomer() {
-            const name = document.getElementById('cName').value.trim();
-            const phone = document.getElementById('cPhone').value.trim();
-            const balance = document.getElementById('cBalance').value;
-            const modalError = document.getElementById('customerModalError');
+        // إضافة صنف للفاتورة
+        function addItemToInvoice() {
+            const productId = document.getElementById('itemProduct').value;
+            const qty = parseInt(document.getElementById('itemQty').value);
 
-            if(!name) { modalError.innerText = "اكتب اسم العميل!"; modalError.classList.remove('hidden'); return; }
-            if(!currentCompanyId) { modalError.innerText = "خطأ: لم يتم العثور على الشركة!"; modalError.classList.remove('hidden'); return; }
-            
-            modalError.classList.add('hidden');
+            if(!productId || qty < 1) return alert('اختر الصنف والكمية!');
 
-            const { error } = await supabase.from('customers').insert([{
-                name: name,
-                phone: phone || null,
-                balance: balance ? parseFloat(balance) : 0,
-                company_id: currentCompanyId // ربط العميل بالشركة
-            }]);
+            const product = allProducts.find(p => p.id === productId);
+            if(!product) return;
 
-            if (error) {
-                modalError.innerText = "خطأ: " + error.message;
-                modalError.classList.remove('hidden');
+            const existing = invoiceItems.find(i => i.product_id === productId);
+            if (existing) {
+                existing.quantity += qty;
             } else {
-                closeCustomerModal();
-                loadCustomers();
+                invoiceItems.push({
+                    product_id: productId,
+                    name: product.name,
+                    price: Number(product.selling_price || 0),
+                    quantity: qty
+                });
             }
+            renderInvoiceTable();
         }
 
-        function openCustomerModal() {
-            document.getElementById('customerModal').classList.remove('hidden');
-            document.getElementById('customerModal').classList.add('flex');
-            document.getElementById('cName').value = '';
-            document.getElementById('cPhone').value = '';
-            document.getElementById('cBalance').value = '';
-            document.getElementById('customerModalError').classList.add('hidden');
-        }
-        function closeCustomerModal() {
-            document.getElementById('customerModal').classList.add('hidden');
-            document.getElementById('customerModal').classList.remove('flex');
+        function renderInvoiceTable() {
+            const tbody = document.getElementById('invoiceItemsTable');
+            if(invoiceItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-slate-500 p-4">لم تتم إضافة أصناف بعد.</td></tr>';
+                document.getElementById('invoiceTotal').innerText = '0.00 ج.م';
+                return;
+            }
+
+            let total = 0;
+            tbody.innerHTML = invoiceItems.map((item, index) => {
+                const lineTotal = item.price * item.quantity;
+                total += lineTotal;
+                return `
+                    <tr class="border-b border-slate-700">
+                        <td class="p-2">${item.name}</td>
+                        <td class="p-2">${item.quantity}</td>
+                        <td class="p-2">${item.price.toFixed(2)}</td>
+                        <td class="p-2 font-bold">${lineTotal.toFixed(2)}</td>
+                        <td class="p-2"><button onclick="removeItem(${index})" class="text-red-400">حذف</button></td>
+                    </tr>
+                `;
+            }).join('');
+            document.getElementById('invoiceTotal').innerText = total.toFixed(2) + ' ج.م';
         }
 
-        function filterCustomerTable() {
-            const input = document.getElementById('searchCustomer').value.toLowerCase();
-            const rows = customersTable.getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) {
-                const text = rows[i].innerText.toLowerCase();
-                rows[i].style.display = text.includes(input) ? '' : 'none';
+        function removeItem(index) {
+            invoiceItems.splice(index, 1);
+            renderInvoiceTable();
+        }
+
+        // حفظ الفاتورة
+        async function saveInvoice() {
+            const customerId = document.getElementById('invoiceCustomer').value;
+            const paid = parseFloat(document.getElementById('invoicePaid').value) || 0;
+            const invoiceError = document.getElementById('invoiceError');
+
+            if(!customerId) return alert('اختر العميل أولاً!');
+            if(invoiceItems.length === 0) return alert('أضف أصناف أولاً!');
+
+            const total = invoiceItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            invoiceError.classList.add('hidden');
+
+            try {
+                // 1. حفظ الفاتورة
+                const { data: invoice, error: invError } = await supabase.from('invoices').insert([{
+                    company_id: currentCompanyId,
+                    customer_id: customerId,
+                    type: 'sale',
+                    total_amount: total,
+                    paid_amount: paid,
+                    status: 'paid'
+                }]).select().single();
+
+                if (invError) throw invError;
+
+                // 2. حفظ تفاصيل الفاتورة
+                const itemsToInsert = invoiceItems.map(item => ({
+                    invoice_id: invoice.id,
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    unit_price: item.price,
+                    total: item.price * item.quantity
+                }));
+
+                const { error: itemsError } = await supabase.from('invoice_items').insert(itemsToInsert);
+                if (itemsError) throw itemsError;
+
+                // 3. خصم من المخزون
+                for (let item of invoiceItems) {
+                    const product = allProducts.find(p => p.id === item.product_id);
+                    if (product) {
+                        await supabase.from('products').update({
+                            current_stock: (Number(product.current_stock) || 0) - item.quantity
+                        }).eq('id', item.product_id);
+                    }
+                }
+
+                alert('✅ تم حفظ الفاتورة بنجاح!');
+                invoiceItems = [];
+                renderInvoiceTable();
+                document.getElementById('invoicePaid').value = '';
+                loadInvoiceData(); // تحديث المخزون
+
+            } catch (err) {
+                invoiceError.innerText = 'خطأ: ' + err.message;
+                invoiceError.classList.remove('hidden');
             }
         }
 
@@ -271,8 +312,7 @@
                 loginScreen.classList.add('hidden');
                 dashboardScreen.classList.remove('hidden');
                 userEmailSpan.innerText = session.user.email;
-                await fetchCompany(); // جلب الشركة
-                loadCustomers(); // تحميل العملاء مبدئياً
+                await fetchCompany();
             } else {
                 loginScreen.classList.remove('hidden');
                 dashboardScreen.classList.add('hidden');
