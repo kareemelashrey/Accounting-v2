@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام المحاسبة الشامل</title>
+    <title>نظام المحاسبة الاحترافي الشامل</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -12,6 +12,7 @@
         .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .page-content { display: none; }
         .page-content.active { display: block; }
+        @media print { .no-print { display: none; } body { background: white; color: black; } }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
@@ -36,17 +37,21 @@
 
     <!-- لوحة التحكم -->
     <div id="dashboardScreen" class="hidden min-h-screen bg-slate-900">
-        <aside class="w-64 bg-slate-800 border-l border-slate-700 flex flex-col hidden md:flex fixed h-full right-0 top-0">
+        <aside class="w-64 bg-slate-800 border-l border-slate-700 flex flex-col hidden md:flex fixed h-full right-0 top-0 no-print">
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900/50">
                 <span class="text-xl font-bold text-blue-500">نظامي المحاسبي</span>
             </div>
             <nav class="flex-1 overflow-y-auto py-4">
                 <p class="px-4 text-xs font-bold text-slate-500 mb-2">العمليات</p>
                 <a href="#" onclick="showPage('home', this)" class="menu-item bg-slate-700 text-blue-400 border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الرئيسية</a>
-                <a href="#" onclick="showPage('inventory', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المخزون (الأصناف)</a>
+                <a href="#" onclick="showPage('inventory', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المخزون والأصناف</a>
                 <a href="#" onclick="showPage('customers', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">العملاء</a>
-                <a href="#" onclick="showPage('sales', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات (فواتير)</a>
+                <a href="#" onclick="showPage('sales', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">المبيعات والفواتير</a>
                 <a href="#" onclick="showPage('cash', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الخزينة والمحافظ</a>
+                
+                <p class="px-4 text-xs font-bold text-slate-500 mt-4 mb-2">الإدارة</p>
+                <a href="#" onclick="showPage('employees', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">الموظفين والشركاء</a>
+                <a href="#" onclick="showPage('reports', this)" class="menu-item text-slate-300 hover:bg-slate-700 flex items-center gap-3 px-4 py-3 text-sm font-semibold">التقارير</a>
             </nav>
             <div class="p-4 border-t border-slate-700">
                 <button id="logoutBtn" class="w-full bg-red-500/10 text-red-400 hover:bg-red-500/20 py-2 rounded-lg font-bold transition-colors">تسجيل خروج</button>
@@ -54,7 +59,7 @@
         </aside>
 
         <main class="mr-0 md:mr-64 min-h-screen flex flex-col">
-            <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6">
+            <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6 no-print">
                 <h2 id="pageTitle" class="text-lg font-bold text-white">لوحة التحكم</h2>
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-slate-400">مرحباً، <span id="userEmail" class="text-blue-400 font-bold">...</span></span>
@@ -62,11 +67,14 @@
             </header>
 
             <div class="p-6">
+                <!-- الرئيسية -->
                 <div id="page-home" class="page-content active">
                     <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center text-slate-500">مرحباً بك في النظام الشامل.</div>
                 </div>
+
+                <!-- المخزون -->
                 <div id="page-inventory" class="page-content">
-                    <div class="flex justify-between items-center mb-4">
+                    <div class="flex justify-between items-center mb-4 no-print">
                         <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">+ إضافة صنف</button>
                     </div>
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto">
@@ -76,8 +84,10 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- العملاء -->
                 <div id="page-customers" class="page-content">
-                    <div class="flex justify-between items-center mb-4">
+                    <div class="flex justify-between items-center mb-4 no-print">
                         <button onclick="openCustomerModal()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">+ إضافة عميل</button>
                     </div>
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-x-auto">
@@ -87,8 +97,10 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- المبيعات -->
                 <div id="page-sales" class="page-content">
-                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 no-print">
                         <h3 class="text-xl font-bold mb-4">فاتورة بيع</h3>
                         <select id="invoiceCustomer" class="w-full bg-slate-700 p-3 rounded mb-4"><option value="">اختر العميل</option></select>
                         <div class="flex gap-2 mb-4">
@@ -100,15 +112,25 @@
                         <div class="flex justify-between text-lg font-bold text-green-400 mb-4">الإجمالي: <span id="invoiceTotal">0.00</span></div>
                         <select id="payMethod" class="w-full bg-slate-700 p-3 rounded mb-2"><option value="cash">كاش</option><option value="instapay">إنستاباي</option><option value="bank_transfer">تحويل بنكي</option></select>
                         <input type="number" id="payAmount" placeholder="المبلغ المدفوع" class="w-full bg-slate-700 p-3 rounded mb-4">
-                        <button onclick="saveInvoice()" class="w-full bg-blue-600 py-3 rounded font-bold">حفظ الفاتورة</button>
+                        <button onclick="saveInvoice()" class="w-full bg-blue-600 py-3 rounded font-bold mb-2">حفظ الفاتورة</button>
+                        <button onclick="window.print()" class="w-full bg-slate-600 py-2 rounded font-bold">طباعة الفاتورة</button>
                     </div>
                 </div>
+
+                <!-- الخزينة المتقدمة -->
                 <div id="page-cash" class="page-content">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                            <h3 class="text-xl font-bold mb-4">إضافة حركة</h3>
+                            <h3 class="text-xl font-bold mb-4">إدارة الخزينة</h3>
                             <select id="txWallet" class="w-full bg-slate-700 p-3 rounded mb-2"></select>
-                            <select id="txType" class="w-full bg-slate-700 p-3 rounded mb-2"><option value="deposit">إيداع / إيراد</option><option value="withdraw">سحب / مصروف</option></select>
+                            <select id="txType" class="w-full bg-slate-700 p-3 rounded mb-2">
+                                <option value="deposit">إيداع / إيراد</option>
+                                <option value="withdraw">سحب / مصروف</option>
+                                <option value="transfer">تحويل لمحفظة أخرى</option>
+                                <option value="external_in">تزويد خارجي</option>
+                                <option value="external_out">سحب خارجي</option>
+                            </select>
+                            <select id="txTargetWallet" class="w-full bg-slate-700 p-3 rounded mb-2 hidden"></select>
                             <input type="number" id="txAmount" placeholder="المبلغ" class="w-full bg-slate-700 p-3 rounded mb-4">
                             <input type="text" id="txDesc" placeholder="البيان (وصف الحركة)" class="w-full bg-slate-700 p-3 rounded mb-4">
                             <button onclick="addTransaction()" class="w-full bg-blue-600 py-2 rounded font-bold">تسجيل الحركة</button>
@@ -119,12 +141,40 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- الموظفين والشركاء -->
+                <div id="page-employees" class="page-content">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <h3 class="text-xl font-bold mb-4">إضافة موظف / شريك</h3>
+                        <input type="text" id="empName" placeholder="الاسم" class="w-full bg-slate-700 p-3 rounded mb-2">
+                        <input type="text" id="empRole" placeholder="الوظيفة (محاسب / شريك)" class="w-full bg-slate-700 p-3 rounded mb-4">
+                        <button onclick="addEmployee()" class="w-full bg-blue-600 py-2 rounded font-bold">حفظ</button>
+                    </div>
+                </div>
+
+                <!-- التقارير -->
+                <div id="page-reports" class="page-content">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                            <h3 class="text-slate-400 text-sm">إجمالي المبيعات</h3>
+                            <p id="reportSales" class="text-3xl font-bold text-green-400">0.00</p>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                            <h3 class="text-slate-400 text-sm">قيمة المخزون</h3>
+                            <p id="reportStock" class="text-3xl font-bold text-blue-400">0.00</p>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                            <h3 class="text-slate-400 text-sm">عدد العملاء</h3>
+                            <p id="reportCustomers" class="text-3xl font-bold text-yellow-400">0</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
     <!-- Modals -->
-    <div id="productModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+    <div id="productModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 no-print">
         <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md">
             <input type="text" id="pName" placeholder="اسم الصنف" class="w-full bg-slate-700 p-3 rounded mb-2">
             <div class="flex gap-2 mb-2"><input type="number" id="pBuy" placeholder="سعر الشراء" class="w-1/2 bg-slate-700 p-3 rounded"><input type="number" id="pSell" placeholder="سعر البيع" class="w-1/2 bg-slate-700 p-3 rounded"></div>
@@ -132,7 +182,7 @@
             <div class="flex gap-2"><button onclick="addProduct()" class="bg-blue-600 flex-1 py-2 rounded">حفظ</button><button onclick="closeModal()" class="bg-slate-600 flex-1 py-2 rounded">إلغاء</button></div>
         </div>
     </div>
-    <div id="customerModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+    <div id="customerModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 no-print">
         <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md">
             <input type="text" id="cName" placeholder="اسم العميل" class="w-full bg-slate-700 p-3 rounded mb-2">
             <input type="text" id="cPhone" placeholder="الهاتف" class="w-full bg-slate-700 p-3 rounded mb-4">
@@ -157,16 +207,28 @@
             document.getElementById('loginBtn').innerText = isRegisterMode ? 'إنشاء شركة ودخول' : 'دخول';
         };
 
+        document.getElementById('txType').onchange = (e) => {
+            const tw = document.getElementById('txTargetWallet');
+            if(e.target.value === 'transfer') {
+                tw.classList.remove('hidden');
+                tw.innerHTML = allWallets.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+            } else {
+                tw.classList.add('hidden');
+            }
+        };
+
         function showPage(pageId, element) {
             document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('bg-slate-700','text-blue-400','border-r-4','border-blue-500'));
             if(element) element.classList.add('bg-slate-700','text-blue-400','border-r-4','border-blue-500');
-            document.getElementById('pageTitle').innerText = { 'home': 'الرئيسية', 'inventory': 'المخزون', 'customers': 'العملاء', 'sales': 'المبيعات', 'cash': 'الخزينة' }[pageId];
+            document.getElementById('pageTitle').innerText = { 'home': 'الرئيسية', 'inventory': 'المخزون', 'customers': 'العملاء', 'sales': 'المبيعات', 'cash': 'الخزينة', 'employees': 'الموظفين', 'reports': 'التقارير' }[pageId];
+            
             if(pageId === 'inventory') loadProducts();
             if(pageId === 'customers') loadCustomers();
             if(pageId === 'sales') loadInvoiceData();
             if(pageId === 'cash') loadWallets();
+            if(pageId === 'reports') loadReports();
         }
 
         async function fetchCompany() {
@@ -229,10 +291,7 @@
             if (errInv) return alert(errInv.message);
             const { error: errItems } = await supabase.from('invoice_items').insert(invoiceItems.map(i => ({ invoice_id: inv.id, product_id: i.product_id, quantity: i.quantity, unit_price: i.price, total: i.price*i.quantity })));
             if (errItems) return alert(errItems.message);
-            if(amt > 0) {
-                const { error: errPay } = await supabase.from('payments').insert([{ company_id: currentCompanyId, invoice_id: inv.id, amount: amt, payment_method: method }]);
-                if (errPay) return alert(errPay.message);
-            }
+            if(amt > 0) await supabase.from('payments').insert([{ company_id: currentCompanyId, invoice_id: inv.id, amount: amt, payment_method: method }]);
             for(let item of invoiceItems) {
                 const p = allProducts.find(x => x.id === item.product_id);
                 await supabase.from('products').update({ current_stock: (+p.current_stock) - item.quantity }).eq('id', item.product_id);
@@ -244,17 +303,42 @@
             const { data } = await supabase.from('wallets').select('*').eq('company_id', currentCompanyId);
             allWallets = data || [];
             document.getElementById('txWallet').innerHTML = allWallets.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
-            document.getElementById('walletBalances').innerHTML = allWallets.map(w => `<div class="flex justify-between p-3 bg-slate-900 rounded border border-slate-700"><span>${w.name}</span><span class="font-bold ${w.balance>0?'text-green-400':'text-slate-400'}">${Number(w.balance).toFixed(2)} ج.م</span></div>`).join('');
+            document.getElementById('walletBalances').innerHTML = allWallets.map(w => `<div class="flex justify-between p-3 bg-slate-900 rounded border border-slate-700"><span>${w.name}</span><span class="font-bold ${w.balance>0?'text {
+-green-400':'text-s           late-400'}">${Number(w.b constalance).toFixed( wid2)} ج.م</ = document.getElementByIdspan></div>`).('join('');
         }
-        async function addTransaction() {
-            const wid = document.getElementById('txWallet').value, type = document.getElementById('txType').value, amt = +document.getElementById('txAmount').value, desc = document.getElementById('txDesc').value;
+        async function addTransactiontx()Wallet').value, type = document.getElementById('txType').value, amt = +document.getElementById('txAmount').value, desc = document.getElementById('txDesc').value;
+            const target = document.getElementById('txTargetWallet').value;
             if(!wid || amt <= 0) return alert('أكمل البيانات!');
-            const { error } = await supabase.from('transactions').insert([{ company_id: currentCompanyId, wallet_id: wid, type: type, amount: amt, description: desc }]);
-            if (error) return alert(error.message);
+            
+            await supabase.from('transactions').insert([{ company_id: currentCompanyId, wallet_id: wid, type: type, amount: amt, description: desc }]);
             const w = allWallets.find(x => x.id === wid);
-            const newBal = type === 'deposit' ? (+w.balance + amt) : (+w.balance - amt);
-            await supabase.from('wallets').update({ balance: newBal }).eq('id', wid);
+            
+            if(type === 'transfer') {
+                await supabase.from('transactions').insert([{ company_id: currentCompanyId, wallet_id: target, type: 'transfer_in', amount: amt, description: 'تحويل من ' + w.name }]);
+                const tw = allWallets.find(x => x.id === target);
+                await supabase.from('wallets').update({ balance: (+w.balance) - amt }).eq('id', wid);
+                await supabase.from('wallets').update({ balance: (+tw.balance) + amt }).eq('id', target);
+            } else {
+                const newBal = (type === 'deposit' || type === 'external_in') ? (+w.balance + amt) : (+w.balance - amt);
+                await supabase.from('wallets').update({ balance: newBal }).eq('id', wid);
+            }
             loadWallets(); document.getElementById('txAmount').value=''; document.getElementById('txDesc').value='';
+        }
+
+        async function loadReports() {
+            const { data: inv } = await supabase.from('invoices').select('total_amount');
+            document.getElementById('reportSales').innerText = (inv||[]).reduce((s, i) => s + Number(i.total_amount), 0).toFixed(2);
+            
+            const { data: prod } = await supabase.from('products').select('current_stock, selling_price');
+            document.getElementById('reportStock').innerText = (prod||[]).reduce((s, p) => s + (Number(p.current_stock) * Number(p.selling_price)), 0).toFixed(2);
+            
+            const { count } = await supabase.from('customers').select('*', { count: 'exact', head: true });
+            document.getElementById('reportCustomers').innerText = count || 0;
+        }
+
+        async function addEmployee() {
+            await supabase.from('employees').insert([{ name: document.getElementById('empName').value, role: document.getElementById('empRole').value, company_id: currentCompanyId }]);
+            alert('تم الحفظ'); document.getElementById('empName').value='';
         }
 
         async function checkSession() {
