@@ -190,21 +190,87 @@ function renderInvoicePayments() {
 async function saveInvoice() {
     const cid = document.getElementById('invoiceCustomer').value;
     if(!cid || !invoiceItems.length) return alert('اختر عميل وأصناف!');
+    
     const total = invoiceItems.reduce((s, i) => s + (i.price*i.quantity), 0);
     const totalPaid = invoicePayments.reduce((s, p) => s + p.amount, 0);
     
-    const { data: inv, error: errInv } = await supabase.from('invoices').insert([{ company_id: currentCompanyId, customer_id: cid, type: 'sale', total_amount: total, paid_amount: totalPaid, status: totalPaid >= total ? 'paid' : 'partial' }]).select().single(); 
+    // 1. حفظ الفاتورة الأساسية
+    const { data: inv, error: errInv } = await supabase.from('invoices').insert([{ 
+        company_id: currentCompanyId, 
+        customer_id: cid, 
+        type: 'sale', 
+        total_amount: total, 
+        paid_amount: totalPaid, 
+        status: totalPaid >= total ? 'paid' : 'partial' 
+    }]).select().single(); 
+    
     if (errInv) return alert(errInv.message);
     
-    await supabase.from('invoice_items').insert(invoiceItems.map(i => ({ invoice_id: inv.id, product_id: i.product_id, quantity: i.quantity, unit_price: i.price, total: i.price*i.quantity }))); 
+    // 2. حفظ الأصناف
+    const { error: errItems } = await supabase.from('invoice_items').insert(invoiceItems.map(i => ({ 
+        invoice_id: inv.id, 
+        product_id: i.product_id, 
+        quantity: i.quantity, 
+        unit_price: i.price, 
+        total: i.price*i.quantity 
+    }))); 
+    if (errItems) return alert(errItems.message);
+
+    // 3. معالجة الدفعات والقيود المحاسبية
     if(invoicePayments.length > 0) {
-        await supabase.from('payments').insert(invoicePayments.map(p => ({ company_id: currentCompanyId, invoice_id: inv.id, amount: p.amount, payment_method: p.method, reference_number: p.ref || null })));
+        // جلب الحسابات المرتبطة بطرق الدفع
+        const { data: methods } = await supabase.from('payment_methods').select('name, account_id').eq('company_id', currentCompanyId);
+        
+        // جلب حساب الإيرادات
+        const { data: revenueAcc } = await supabase.from('accounts').select('id').eq('code', '4000').eq('company_id', currentCompanyId).single();
+
+        // حفظ الدفعات
+        await supabase.from('payments').insert(invoicePayments.map(p => ({ 
+            company_id: currentCompanyId, 
+            invoice_id: inv.id, 
+            amount: p.amount, 
+            payment_method: p.method, 
+            reference_number: p.ref || null 
+        })));
+
+        // إنشاء القيود اليومية
+        for(let p of invoicePayments) {
+            let methodName = 'كاش';
+            if(p.method === 'instapay') methodName = 'إنستاباي';
+            else if(p.method === 'wallet') methodName = 'محفظة إلكترونية';
+            else if(p.method === 'bank_transfer') methodName = 'تحويل بنكي';
+            else if(p.method === 'cheque') methodName = 'شيك';
+            
+            const method = methods.find(m => m.name === methodName);
+            if(!method) continue;
+
+            const { data: entry } = await supabase.from('journal_entries').insert([{ 
+                company_id: currentCompanyId, 
+                description: `تحصيل دفعة فاتورة ${inv.id.slice(0,8)}`, 
+                entry_date: new Date().toISOString().split('T')[0] 
+            }]).select().single();
+
+            if(entry) {
+                await supabase.from('journal_lines').insert([
+                    { entry_id: entry.id, account_id: method.account_id, debit: p.amount, credit: 0 }, // مدين المحفظة
+                    { entry_id: entry.id, account_id: revenueAcc.id, debit: 0, credit: p.amount } // دائن الإيرادات
+                ]);
+            }
+        }
     }
-    for(let item of invoiceItems) {
-        const p = allProducts.find(x => x.id === item.product_id);
-        await supabase.from('products').update({ current_stock: (+p.current_stock) - item.quantity }).eq('id', item.product_id);
+
+    // 4. خصم المخزون
+    for(let item of invoiceItems) { 
+        const p = allProducts.find(x => x.id === item.product_id); 
+        await supabase.from('products').update({ current_stock: (+p.current_stock) - item.quantity }).eq('id', item.product_id); 
     }
-    alert('✅ تم حفظ الفاتورة والدفعات!'); invoiceItems = []; invoicePayments = []; renderInvoiceTable(); renderInvoicePayments(); loadInvoiceData();
+
+    alert('✅ تم حفظ الفاتورة والدفعات، والقيود المحاسبية!'); 
+    invoiceItems = []; 
+    invoicePayments = []; 
+    renderInvoiceTable(); 
+    renderInvoicePayments(); 
+    loadInvoiceData();
 }
 function printLastInvoice() {
     const { jsPDF } = window.jspdf;
