@@ -38,8 +38,28 @@ async function checkSession() {
         loginScreen.classList.add('hidden'); 
         dashboardScreen.classList.remove('hidden'); 
         userEmailSpan.innerText = session.user.email; 
-        await fetchCompany(); 
+        
+        // تحميل الشركة فوراً
+        const { data: user } = await supabase.auth.getUser();
+        if(user && user.user) {
+            const { data: profile } = await supabase.from('user_profiles').select('company_id').eq('id', user.user.id).single();
+            if(profile && profile.company_id) {
+                currentCompanyId = profile.company_id;
+            } else {
+                // لو مفيش شركة مسجلة، نعمل شركة افتراضية
+                const { data: newComp } = await supabase.from('companies').insert([{ name: 'شركتي الأولى' }]).select().single();
+                if(newComp) {
+                    currentCompanyId = newComp.id;
+                    await supabase.from('user_profiles').upsert([{ id: user.user.id, company_id: newComp.id, role: 'admin' }]);
+                }
+            }
+        }
     }
+    else { 
+        loginScreen.classList.remove('hidden'); 
+        dashboardScreen.classList.add('hidden'); 
+    }
+}
     else { loginScreen.classList.remove('hidden'); dashboardScreen.classList.add('hidden'); }
 }
 
